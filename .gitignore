@@ -1,0 +1,12 @@
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Mac/Windows System files
+.DS_Store
+Thumbs.db
+
+# Compiled Java
+*.class
