@@ -10,3 +10,4 @@ Thumbs.db
 
 # Compiled Java
 *.class
+/.metadata/
