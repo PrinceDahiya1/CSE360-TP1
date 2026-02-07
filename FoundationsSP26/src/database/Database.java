@@ -12,7 +12,7 @@ import java.util.UUID;
 import entityClasses.User;
 
 /*******
- * <p> Title: Database Class. </p>
+ * <p> Title: Database Class.  </p>
  * 
  * <p> Description: This is an in-memory database built on H2.  Detailed documentation of H2 can
  * be found at https://www.h2database.com/html/main.html (Click on "PDF (2MP) for a PDF of 438 pages
