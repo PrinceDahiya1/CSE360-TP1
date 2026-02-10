@@ -1,6 +1,7 @@
 package guiAdminUserList;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import entityClasses.User;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -8,11 +9,15 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -29,7 +34,8 @@ import javafx.stage.Stage;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Prince Dahiya
- * @version 1.00		2025-02-07 Implemented list users feature
+ * @version 1.00		2026-02-07 Implemented list users feature
+ * @version 1.01		2026-02-08 Implemented delete functionality
  */
 
 public class ViewAdminUserList {
@@ -43,15 +49,15 @@ public class ViewAdminUserList {
 	 * 
 	 * @param parentStage The primary stage of the application, used to center this window (if needed)
 	 */
-    public static void display(Stage parentStage) {
+    public static void display(Stage parentStage, boolean allowDelete) {
         Stage window = new Stage();
         window.initModality(Modality.APPLICATION_MODAL); // Block interaction with other windows
-        window.setTitle("All Registered Users");
-        window.setMinWidth(800);
+        window.setTitle(allowDelete ? "Delete a User" : "All Registered Users"); // Dynamic Title
+		window.setMinWidth(800);
 
-        Label label = new Label("Registered Users");
-        label.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-
+		Label label = new Label(allowDelete ? "Select a User to Delete" : "Registered Users");
+		label.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+		
         // --- Table Setup ---
         TableView<User> table = new TableView<>();
         
@@ -89,25 +95,71 @@ public class ViewAdminUserList {
         });
 
         table.getColumns().addAll(userCol, nameCol, emailCol, roleCol);
+        
+        // Helper to refresh data
+     	refreshTableData(table);
+     	
+     	// --- Buttons ---
+     	HBox buttonBox = new HBox(20);
+		buttonBox.setAlignment(Pos.CENTER);
 
-        // --- Fetch Data ---
-        // Access the database via the main application reference
-        ArrayList<User> userList = applicationMain.FoundationsMain.database.getAllUsers();
-        ObservableList<User> observableList = FXCollections.observableArrayList(userList);
-        table.setItems(observableList);
+		// CONDITIONAL LOGIC: Only add the Delete button if the mode is "true"
+		if (allowDelete) {
+			Button deleteButton = new Button("Delete Selected");
+			deleteButton.setStyle("-fx-background-color: #ffcccc; -fx-text-fill: darkred;");
+			deleteButton.setOnAction(e -> {
+				User selected = table.getSelectionModel().getSelectedItem();
+				if (selected == null) {
+					showAlert("No Selection", "Please select a user to delete.");
+					return;
+				}
+				// Self-deletion check
+				String currentUsername = guiAdminHome.ViewAdminHome.theUser.getUserName();
+				if (selected.getUserName().equals(currentUsername)) {
+					showAlert("Action Denied", "You cannot delete your own account.");
+					return;
+				}
+				// Confirmation
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle("Confirm Deletion");
+				alert.setHeaderText("Delete user: " + selected.getUserName() + "?");
+				alert.setContentText("This action cannot be undone.");
 
-        // --- Close Button ---
-        Button closeButton = new Button("Close");
-        closeButton.setOnAction(e -> window.close());
+				Optional<ButtonType> result = alert.showAndWait();
+				if (result.isPresent() && result.get() == ButtonType.OK) {
+					applicationMain.FoundationsMain.database.deleteUser(selected.getUserName());
+					refreshTableData(table);
+				}
+			});
+			buttonBox.getChildren().add(deleteButton);
+		}
 
-        // --- Layout ---
-        VBox layout = new VBox(20);
-        layout.getChildren().addAll(label, table, closeButton);
-        layout.setAlignment(Pos.CENTER);
-        layout.setPadding(new Insets(20));
+		Button closeButton = new Button("Close");
+		closeButton.setOnAction(e -> window.close());
+		buttonBox.getChildren().add(closeButton);
 
-        Scene scene = new Scene(layout);
-        window.setScene(scene);
-        window.showAndWait();
+		// --- Layout ---
+		VBox layout = new VBox(20);
+		layout.getChildren().addAll(label, table, buttonBox);
+		layout.setAlignment(Pos.CENTER);
+		layout.setPadding(new Insets(20));
+
+		Scene scene = new Scene(layout);
+		window.setScene(scene);
+		window.showAndWait();
     }
+
+ 	private static void refreshTableData(TableView<User> table) {
+ 		ArrayList<User> userList = applicationMain.FoundationsMain.database.getAllUsers();
+ 		ObservableList<User> observableList = FXCollections.observableArrayList(userList);
+ 		table.setItems(observableList);
+ 	}
+
+ 	private static void showAlert(String title, String content) {
+ 		Alert alert = new Alert(AlertType.WARNING);
+ 		alert.setTitle(title);
+ 		alert.setHeaderText(null);
+ 		alert.setContentText(content);
+ 		alert.showAndWait();
+ 	}
 }

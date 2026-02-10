@@ -43,6 +43,7 @@ import guiUserUpdate.ViewUserUpdate;
  * @author Lynn Robert Carter
  * 
  * @version 1.00		2025-08-17 Initial version
+ * @version 1.01		2026-02-08 Changed theUser var to public
  *  
  */
 
@@ -126,7 +127,7 @@ public class ViewAdminHome {
 	
 	protected static Stage theStage;			// The Stage that JavaFX has established for us
 	private static Pane theRootPane;			// The Pane that holds all the GUI widgets 
-	protected static User theUser;				// The current logged in User
+	public static User theUser;				// The current logged in User
 
 	private static Scene theAdminHomeScene;		// The shared Scene each invocation populates
 	private static final int theRole = 1;		// Admin: 1; Role1: 2; Role2: 3

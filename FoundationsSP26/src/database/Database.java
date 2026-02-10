@@ -28,6 +28,7 @@ import entityClasses.User;
  * 							version by Pravalika Mukkiri and Ishwarya Hidkimath Basavaraj
  * @version 2.01		2025-12-17 Minor updates for Spring 2026
  * @version 2.02		2026-02-04 Added a function to return All users in the Database
+ * @version 2.03		2026-02-03 Added a function to delete a user in the Database
  */
 
 /*
@@ -1042,31 +1043,14 @@ public class Database {
 		resultSet.close();
 	}
 
+	
 
 	/*******
-	 * <p> Method: void closeConnection()</p>
-	 * 
-	 * <p> Description: Closes the database statement and connection.</p>
-	 * 
-	 */
-	// Closes the database statement and connection.
-	public void closeConnection() {
-		try{ 
-			if(statement!=null) statement.close(); 
-		} catch(SQLException se2) { 
-			se2.printStackTrace();
-		} 
-		try { 
-			if(connection!=null) connection.close(); 
-		} catch(SQLException se){ 
-			se.printStackTrace(); 
-		} 
-	}
-	
-	/*******
 	 * <p> Method: ArrayList<User> getAllUsers() </p>
-	 * * <p> Description: Fetch all users from the database to display in a list. </p>
-	 * * @return ArrayList of User objects
+	 * 
+	 * <p> Description: Fetch all users from the database to display in a list. </p>
+	 * 
+	 * @return ArrayList of User objects
 	 */
 	public java.util.ArrayList<User> getAllUsers() {
 		java.util.ArrayList<User> list = new java.util.ArrayList<>();
@@ -1094,4 +1078,44 @@ public class Database {
 		}
 		return list;
 	}
+	
+	
+	/*******
+	 * <p> Method: void deleteUser(String username) </p>
+	 * 
+	 * <p> Description: Deletes a user from the database. </p>
+	 * 
+	 * @param username The username of the account to delete
+	 */
+	public void deleteUser(String username) {
+		String query = "DELETE FROM userDB WHERE userName = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, username);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/*******
+	 * <p> Method: void closeConnection()</p>
+	 * 
+	 * <p> Description: Closes the database statement and connection.</p>
+	 * 
+	 */
+	// Closes the database statement and connection.
+	public void closeConnection() {
+		try{ 
+			if(statement!=null) statement.close(); 
+		} catch(SQLException se2) { 
+			se2.printStackTrace();
+		} 
+		try { 
+			if(connection!=null) connection.close(); 
+		} catch(SQLException se){ 
+			se.printStackTrace(); 
+		} 
+	}
+	
 }
