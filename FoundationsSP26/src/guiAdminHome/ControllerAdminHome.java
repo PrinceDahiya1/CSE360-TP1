@@ -20,9 +20,11 @@ import database.Database;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
  * 
  * @version 1.00		2025-08-17 Initial version
  * @version 1.01		2025-09-16 Update Javadoc documentation *  
+ * @version 1.02		2025-02-08 Implemented the listUsers() method
  */
 
 public class ControllerAdminHome {
@@ -136,18 +138,12 @@ public class ControllerAdminHome {
 	
 	/**********
 	 * <p> 
-	 * 
 	 * Title: listUsers () Method. </p>
-	 * 
-	 * <p> Description: Protected method that is currently a stub informing the user that
-	 * this function has not yet been implemented. </p>
-	 */
+	 * * <p> Description: Protected method that displays the list of registered users. </p>
+	 * */
 	protected static void listUsers() {
-		System.out.println("\n*** WARNING ***: List Users Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
-		ViewAdminHome.alertNotImplemented.setHeaderText("List User Issue");
-		ViewAdminHome.alertNotImplemented.setContentText("List Users Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.showAndWait();
+		// Call the new View we just created
+		guiAdminUserList.ViewAdminUserList.display(ViewAdminHome.theStage);
 	}
 	
 	/**********

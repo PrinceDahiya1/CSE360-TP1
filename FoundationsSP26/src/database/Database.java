@@ -22,10 +22,12 @@ import entityClasses.User;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
  * 
  * @version 2.00		2025-04-29 Updated and expanded from the version produce by on a previous
  * 							version by Pravalika Mukkiri and Ishwarya Hidkimath Basavaraj
  * @version 2.01		2025-12-17 Minor updates for Spring 2026
+ * @version 2.02		2026-02-04 Added a function to return All users in the Database
  */
 
 /*
@@ -1059,5 +1061,37 @@ public class Database {
 		} catch(SQLException se){ 
 			se.printStackTrace(); 
 		} 
+	}
+	
+	/*******
+	 * <p> Method: ArrayList<User> getAllUsers() </p>
+	 * * <p> Description: Fetch all users from the database to display in a list. </p>
+	 * * @return ArrayList of User objects
+	 */
+	public java.util.ArrayList<User> getAllUsers() {
+		java.util.ArrayList<User> list = new java.util.ArrayList<>();
+		String query = "SELECT * FROM userDB";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				// Create User object from DB row
+				User u = new User(
+					rs.getString("userName"),
+					rs.getString("password"),
+					rs.getString("firstName"),
+					rs.getString("middleName"),
+					rs.getString("lastName"),
+					rs.getString("preferredFirstName"),
+					rs.getString("emailAddress"),
+					rs.getBoolean("adminRole"),
+					rs.getBoolean("newRole1"), // Role1 (Student)
+					rs.getBoolean("newRole2")  // Role2 (Staff)
+				);
+				list.add(u);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
 	}
 }
