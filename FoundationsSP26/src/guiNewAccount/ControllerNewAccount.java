@@ -26,6 +26,7 @@ import userNameRecognizerTestbed.UserNameRecognizer;
  * 
  * @version 1.00		2025-08-17 Initial version
  * @version 1.01		2026-01-26 Added UserNameRecognizer FSM logic for Username validation
+ * @version 1.02		2026-02-08 Fixed logic after changes in constructor for OTP feature
  *  
  */
 
@@ -100,13 +101,13 @@ public class ControllerNewAccount {
 			// information provided in the invitation
 			if (ViewNewAccount.theRole.compareTo("Admin") == 0) {
 				roleCode = 1;
-				user = new User(username, password, "", "", "", "", "", true, false, false);
+				user = new User(username, password, "", "", "", "", "", true, false, false, false);
 			} else if (ViewNewAccount.theRole.compareTo("Role1") == 0) {
 				roleCode = 2;
-				user = new User(username, password, "", "", "", "", "", false, true, false);
+				user = new User(username, password, "", "", "", "", "", false, true, false, false);
 			} else if (ViewNewAccount.theRole.compareTo("Role2") == 0) {
 				roleCode = 3;
-				user = new User(username, password, "", "", "", "", "", false, false, true);
+				user = new User(username, password, "", "", "", "", "", false, false, true, false);
 			} else {
 				System.out.println(
 						"**** Trying to create a New Account for a role that does not exist!");

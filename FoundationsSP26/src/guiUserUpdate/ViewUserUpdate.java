@@ -31,8 +31,10 @@ import entityClasses.User;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
  * 
  * @version 1.01		2025-08-19 Initial version plus new internal documentation
+ * @version 1.02		2026-02-09 Added Update Password Login
  *  
  */
 
@@ -101,6 +103,7 @@ public class ViewUserUpdate {
 	private static TextInputDialog dialogUpdateLastName;
 	private static TextInputDialog dialogUpdatePreferredFirstName;
 	private static TextInputDialog dialogUpdateEmailAddresss;
+	private static TextInputDialog dialogUpdatePassword;
 	
 	// These attributes are used to configure the page and populate it with this user's information
 	private static ViewUserUpdate theView;	// Used to determine if instantiation of the class
@@ -236,6 +239,10 @@ public class ViewUserUpdate {
 		
 		dialogUpdateEmailAddresss.setTitle("Update Email Address");
 		dialogUpdateEmailAddresss.setHeaderText("Update your Email Address");
+		
+		dialogUpdatePassword = new TextInputDialog("");
+		dialogUpdatePassword.setTitle("Update Password");
+		dialogUpdatePassword.setHeaderText("Enter your new password:");
 
 		// Label theScene with the name of the startup screen, centered at the top of the pane
 		setupLabelUI(label_ApplicationTitle, "Arial", 28, width, Pos.CENTER, 0, 5);
@@ -324,6 +331,22 @@ public class ViewUserUpdate {
         	if (newEmail == null || newEmail.length() < 1)label_CurrentEmailAddress.setText("<none>");
         	else label_CurrentEmailAddress.setText(newEmail);
  			});
+        
+        //Update Password
+        button_UpdatePassword.setOnAction((event) -> {
+            result = dialogUpdatePassword.showAndWait();
+            result.ifPresent(newPwd -> {
+                // 1. Update Database (clears OTP flag)
+                theDatabase.updatePassword(theUser.getUserName(), newPwd);
+
+                // 2. Update Local Object (so the app knows it changed immediately)
+                theUser.setPassword(newPwd);
+                theUser.setHasOTP(false); 
+
+                // 3. Update UI Label
+                label_CurrentPassword.setText(newPwd);
+            });
+        });
         
         // Set up the button to proceed to this user's home page
         setupButtonUI(button_ProceedToUserHomePage, "Dialog", 18, 300, 

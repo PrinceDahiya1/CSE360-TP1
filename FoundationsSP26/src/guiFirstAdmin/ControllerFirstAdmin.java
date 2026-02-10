@@ -28,6 +28,7 @@ import userNameRecognizerTestbed.UserNameRecognizer;
  * 
  * @version 1.00		2025-08-17 Initial version
  * @version 1.01		2026-01-26 Added UserNameRecognizer FSM logic for Admin Username validation
+ * @version 1.02		2026-02-08 Fixed logic after changes in constructor for OTP feature
  *  
  */
 
@@ -124,7 +125,7 @@ public class ControllerFirstAdmin {
 		if (adminPassword1.compareTo(adminPassword2) == 0) {
         	// Create the passwords and proceed to the user home page
         	User user = new User(adminUsername, adminPassword1, "", "", "", "", "", true, false, 
-        			false);
+        			false, false);
             try {
             	// Create a new User object with admin role and register in the database
             	theDatabase.register(user);

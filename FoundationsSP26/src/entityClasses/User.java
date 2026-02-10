@@ -9,8 +9,9 @@ package entityClasses;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
  * 
- * 
+ * @version 1.01 		2026-02-08 Added necessities for ResetOTP feature
  */ 
 
 public class User {
@@ -28,6 +29,7 @@ public class User {
     private boolean adminRole;
     private boolean role1;
     private boolean role2;
+    private boolean hasOTP;
     
     
     /*****
@@ -56,10 +58,12 @@ public class User {
      * 
      * @param r3 specifies the the Reviewer attribute (TRUE or FALSE) for this user
      * 
+     * @param hasOTP specifies if the user is using an OTP to login
+     * 
      */
     // Constructor to initialize a new User object with userName, password, and role.
     public User(String userName, String password, String fn, String mn, String ln, String pfn, 
-    		String ea, boolean r1, boolean r2, boolean r3) {
+    		String ea, boolean r1, boolean r2, boolean r3, boolean hasOTP) {
         this.userName = userName;
         this.password = password;
         this.firstName = fn;
@@ -70,7 +74,11 @@ public class User {
         this.adminRole = r1;
         this.role1 = r2;
         this.role2 = r3;
+        this.hasOTP = hasOTP;
     }
+    
+    public boolean getHasOTP() {return hasOTP;}
+    public void setHasOTP(boolean hasOTP) {this.hasOTP = hasOTP;}
 
     
     /*****

@@ -3,6 +3,8 @@ package guiUserLogin;
 import database.Database;
 import entityClasses.User;
 import javafx.stage.Stage;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 /*******
  * <p> Title: ControllerUserLogin Class. </p>
@@ -23,9 +25,12 @@ import javafx.stage.Stage;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
  * 
  * @version 1.00		2025-08-17 Initial version
  * @version 1.01		2025-09-16 Update Javadoc documentation *  
+ * @version 1.02		2026-02-08 Fixed logic after changes in constructor for OTP feature
+ * @version 1.03		2026-02-09 The User is now forced to change password after use of OTP
  */
 
 public class ControllerUserLogin {
@@ -91,11 +96,33 @@ public class ControllerUserLogin {
 		// System.out.println("*** Password is valid for this user");
 		
 		// Establish this user's details
-    	User user = new User(username, password, theDatabase.getCurrentFirstName(), 
-    			theDatabase.getCurrentMiddleName(), theDatabase.getCurrentLastName(), 
-    			theDatabase.getCurrentPreferredFirstName(), theDatabase.getCurrentEmailAddress(), 
-    			theDatabase.getCurrentAdminRole(), 
-    			theDatabase.getCurrentNewRole1(), theDatabase.getCurrentNewRole2());
+		// NOTE: We retrieve the user from the full list to ensure we get the correct "isOTP" flag
+    	User user = null;
+    	for (User u : theDatabase.getAllUsers()) {
+    		if (u.getUserName().equals(username)) {
+    			user = u;
+    			break;
+    		}
+    	}
+    	
+    	// Fallback if loop fails (should not happen if getUserAccountDetails passed)
+    	if (user == null) return;
+    	
+    	// --- OTP SECURITY CHECK ---
+    	// If the user has a One-Time Password active, they MUST update it now.
+    	if (user.getHasOTP()) {
+    		System.out.println("OTP Detected for user: " + username);
+    		
+    		Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Password Reset Required");
+            alert.setHeaderText("Temporary Password Detected");
+            alert.setContentText("You are using a One-Time Password. You must update your password now.");
+            alert.showAndWait();
+            
+            // Redirect to User Update Page immediately
+            guiUserUpdate.ViewUserUpdate.displayUserUpdate(theStage, user);
+            return; // Stop the login process here
+    	}
     	
     	// See which home page dispatch to use
 		int numberOfRoles = theDatabase.getNumberOfRoles(user);		

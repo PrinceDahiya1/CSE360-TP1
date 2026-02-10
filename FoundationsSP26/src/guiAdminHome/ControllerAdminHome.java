@@ -104,23 +104,20 @@ public class ControllerAdminHome {
 		ViewAdminHome.alertNotImplemented.showAndWait();
 	}
 	
+	
 	/**********
 	 * <p> 
 	 * 
-	 * Title: setOnetimePassword () Method. </p>
+	 * Title: listUsers () Method. </p>
 	 * 
-	 * <p> Description: Protected method that is currently a stub informing the user that
-	 * this function has not yet been implemented. </p>
+	 * <p> Description: Protected method that displays the list of registered users. </p>
 	 */
-	protected static void setOnetimePassword () {
-		System.out.println("\n*** WARNING ***: One-Time Password Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
-		ViewAdminHome.alertNotImplemented.setHeaderText("One-Time Password Issue");
-		ViewAdminHome.alertNotImplemented.setContentText("One-Time Password Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.showAndWait();
-	}
-	
-	/**********
+	// 1. List All Users (Mode 0)
+    protected static void listUsers() {
+        guiAdminUserList.ViewAdminUserList.display(ViewAdminHome.theStage, 0);
+    }
+    
+    /**********
 	 * <p> 
 	 * 
 	 * Title: deleteUser () Method. </p>
@@ -129,20 +126,20 @@ public class ControllerAdminHome {
 	 * Instead of asking for a username blindly, it opens the User List window
 	 * so the Admin can select the correct user to delete safely. </p>
 	 */
-	protected static void deleteUser() {
-		System.out.println("Delete User button clicked - Opening User List");
-		// Reuse the robust List View we created!
-		guiAdminUserList.ViewAdminUserList.display(ViewAdminHome.theStage, true);
-	}
-	
-	/**********
+    // 2. Delete User (Mode 1)
+    protected static void deleteUser() {
+        guiAdminUserList.ViewAdminUserList.display(ViewAdminHome.theStage, 1);
+    }
+    
+    /**********
 	 * <p> 
-	 * Title: listUsers () Method. </p>
-	 * * <p> Description: Protected method that displays the list of registered users. </p>
-	 * */
-	protected static void listUsers() {
-		// Call the new View we just created
-		guiAdminUserList.ViewAdminUserList.display(ViewAdminHome.theStage, false);
+	 * 
+	 * Title: setOnetimePassword () Method. </p>///////////////////////////////////////////////////////////////////////////////////////////////
+	 * 
+	 * <p> Description: This method handles the "Set a One Time Password" button click. </p>
+	 */
+	protected static void setOnetimePassword () {
+		guiAdminUserList.ViewAdminUserList.display(ViewAdminHome.theStage, 2);
 	}
 	
 	/**********

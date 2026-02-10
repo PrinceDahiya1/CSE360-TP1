@@ -41,6 +41,7 @@ import guiUserUpdate.ViewUserUpdate;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
  * 
  * @version 1.00		2025-08-17 Initial version
  * @version 1.01		2026-02-08 Changed theUser var to public

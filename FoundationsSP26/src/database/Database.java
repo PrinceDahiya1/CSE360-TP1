@@ -29,6 +29,7 @@ import entityClasses.User;
  * @version 2.01		2025-12-17 Minor updates for Spring 2026
  * @version 2.02		2026-02-04 Added a function to return All users in the Database
  * @version 2.03		2026-02-03 Added a function to delete a user in the Database
+ * @version 2.04		2026-02-08 Added and fixed logic for OTP feature
  */
 
 /*
@@ -118,7 +119,8 @@ public class Database {
 				+ "emailAddress VARCHAR(255), "
 				+ "adminRole BOOL DEFAULT FALSE, "
 				+ "newRole1 BOOL DEFAULT FALSE, "
-				+ "newRole2 BOOL DEFAULT FALSE)";
+				+ "newRole2 BOOL DEFAULT FALSE,"
+				+ "isOTP BOOL DEFAULT FALSE)";
 		statement.execute(userTable);
 		
 		// Create the invitation codes table
@@ -185,8 +187,8 @@ public class Database {
  */
 	public void register(User user) throws SQLException {
 		String insertUser = "INSERT INTO userDB (userName, password, firstName, middleName, "
-				+ "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2, isOTP) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
 			currentUsername = user.getUserName();
 			pstmt.setString(1, currentUsername);
@@ -217,6 +219,8 @@ public class Database {
 			
 			currentNewRole2 = user.getNewRole2();
 			pstmt.setBoolean(10, currentNewRole2);
+			
+			pstmt.setBoolean(11, user.getHasOTP());
 			
 			pstmt.executeUpdate();
 		}
@@ -1069,7 +1073,8 @@ public class Database {
 					rs.getString("emailAddress"),
 					rs.getBoolean("adminRole"),
 					rs.getBoolean("newRole1"), // Role1 (Student)
-					rs.getBoolean("newRole2")  // Role2 (Staff)
+					rs.getBoolean("newRole2"),  // Role2 (Staff)
+					rs.getBoolean("isOTP")
 				);
 				list.add(u);
 			}
@@ -1092,6 +1097,44 @@ public class Database {
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, username);
 			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**********
+	 * <p> Method: resetPassword </p>
+	 * 
+	 * <p> Description: Resets the user's password to a temporary OTP and flags it. </p>
+	 *
+	 * @param username The username to change password for
+	 * @param tempPassword The OneTimePassword
+	 */
+	public void resetPassword(String username, String tempPassword) {
+		String query = "UPDATE userDB SET password = ?, isOTP = TRUE WHERE userName = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, tempPassword);
+			pstmt.setString(2, username);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**********
+	 * <p> Method: updatePassword </p>
+	 * * <p> Description: Updates the password and clears the OTP flag. </p>
+	 */
+	public void updatePassword(String username, String newPassword) {
+		// CRITICAL: We also set isOTP = FALSE because the user has now fixed it.
+		String query = "UPDATE userDB SET password = ?, isOTP = FALSE WHERE userName = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, newPassword);
+			pstmt.setString(2, username);
+			pstmt.executeUpdate();
+			currentPassword = newPassword;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

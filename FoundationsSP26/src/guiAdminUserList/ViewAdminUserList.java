@@ -21,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.security.SecureRandom;
 
 /*******
  * <p> Title: ViewAdminUserList Class </p>
@@ -34,6 +35,7 @@ import javafx.stage.Stage;
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Prince Dahiya
+ * 
  * @version 1.00		2026-02-07 Implemented list users feature
  * @version 1.01		2026-02-08 Implemented delete functionality
  */
@@ -49,13 +51,18 @@ public class ViewAdminUserList {
 	 * 
 	 * @param parentStage The primary stage of the application, used to center this window (if needed)
 	 */
-    public static void display(Stage parentStage, boolean allowDelete) {
+    public static void display(Stage parentStage, int mode) {
         Stage window = new Stage();
         window.initModality(Modality.APPLICATION_MODAL); // Block interaction with other windows
-        window.setTitle(allowDelete ? "Delete a User" : "All Registered Users"); // Dynamic Title
 		window.setMinWidth(800);
+		
+		String title = "All Registered Users";
+		if (mode == 1) title = "Delete a User";
+		if (mode == 2) title = "Reset User Password";
+		
+		window.setTitle(title);
 
-		Label label = new Label(allowDelete ? "Select a User to Delete" : "Registered Users");
+		Label label = new Label(title);
 		label.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 		
         // --- Table Setup ---
@@ -88,6 +95,7 @@ public class ViewAdminUserList {
             if (u.getAdminRole()) roles.append("Admin, ");
             if (u.getNewRole1()) roles.append("Student, ");
             if (u.getNewRole2()) roles.append("Staff, ");
+            if (u.getHasOTP()) roles.append("[OTP Active], ");
             
             // Remove trailing comma
             if (roles.length() > 0) roles.setLength(roles.length() - 2);
@@ -104,7 +112,7 @@ public class ViewAdminUserList {
 		buttonBox.setAlignment(Pos.CENTER);
 
 		// CONDITIONAL LOGIC: Only add the Delete button if the mode is "true"
-		if (allowDelete) {
+		if (mode == 1) {
 			Button deleteButton = new Button("Delete Selected");
 			deleteButton.setStyle("-fx-background-color: #ffcccc; -fx-text-fill: darkred;");
 			deleteButton.setOnAction(e -> {
@@ -132,6 +140,43 @@ public class ViewAdminUserList {
 				}
 			});
 			buttonBox.getChildren().add(deleteButton);
+		} 
+		if (mode == 2) {
+		    Button otpButton = new Button("Set One-Time Password");
+		    otpButton.setStyle("-fx-background-color: #cce5ff; -fx-text-fill: darkblue;"); // Blue style
+		    otpButton.setOnAction(e -> {
+		        User selected = table.getSelectionModel().getSelectedItem();
+		        if (selected == null) {
+		            showAlert("No Selection", "Please select a user.");
+		            return;
+		        }
+
+		        // Use SecureRandom to Generate OTP
+	            java.security.SecureRandom random = new java.security.SecureRandom();
+	            int num = 1000 + random.nextInt(9000); // Generates 1000 to 9999
+	            String otpCode = "OTP-" + num; // to visually signal this is supposed to be used once
+
+		        // Confirmation Popup
+		        Alert alert = new Alert(AlertType.CONFIRMATION);
+		        alert.setTitle("Confirm Reset");
+		        alert.setHeaderText("Reset password for " + selected.getUserName() + "?");
+		        alert.setContentText("New Temporary Password: " + otpCode);
+
+		        Optional<ButtonType> result = alert.showAndWait();
+		        if (result.isPresent() && result.get() == ButtonType.OK) {
+		            // Update Database
+		            applicationMain.FoundationsMain.database.resetPassword(selected.getUserName(), otpCode);
+		            refreshTableData(table);
+
+		            // Show Success Message
+		            Alert success = new Alert(AlertType.INFORMATION);
+		            success.setTitle("Success");
+		            success.setHeaderText("Password Reset Complete");
+		            success.setContentText("Send this password to the user: " + otpCode);
+		            success.showAndWait();
+		        }
+		    });
+		    buttonBox.getChildren().add(otpButton);
 		}
 
 		Button closeButton = new Button("Close");
