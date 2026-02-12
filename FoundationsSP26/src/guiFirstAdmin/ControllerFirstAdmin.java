@@ -5,6 +5,8 @@ import database.Database;
 import entityClasses.User;
 import javafx.stage.Stage;
 import userNameRecognizerTestbed.UserNameRecognizer;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 /*******
  * <p> Title: ControllerFirstAdmin Class. </p>
@@ -108,20 +110,40 @@ public class ControllerFirstAdmin {
 	 */
 	protected static void doSetupAdmin(Stage ps, int r) {
 		
-		// Task 8 Integration: Validate using a Label (Same Window)
+		// --- CHECK 1: Input Validation Framework (Length Checks) ---
+		// This prevents buffer overflows or massive strings
+		String valMsg = entityClasses.InputUtils.validateInput(adminUsername, 50, "Username");
+		if (!valMsg.isEmpty()) {
+			showAlert("Invalid Input", valMsg);
+			return;
+		}
+		
+		valMsg = entityClasses.InputUtils.validateInput(adminPassword1, 50, "Password");
+		if (!valMsg.isEmpty()) {
+			showAlert("Invalid Input", valMsg);
+			return;
+		}
+
+		// --- CHECK 2: USERNAME RECOGNIZER (Task 8) ---
 		// FSM logic is called here to prevent invalid data from reaching the database
 		String errorMessage = UserNameRecognizer.checkForValidUserName(adminUsername);
 
 		if (errorMessage.length() > 0) {
-		    // Show the error on the screen
 		    ViewFirstAdmin.label_UserNameError.setText(errorMessage);
 		    return; // stop account creation
 		} else {
-		    // Clear the error if the username is now valid
 		    ViewFirstAdmin.label_UserNameError.setText("");
 		}
 		
-		// Make sure the two passwords are the same
+		// --- CHECK 3: PASSWORD SECURITY (Task 11) ---
+		// This uses the FSM to ensure the password has Upper/Lower/Number/Special chars
+		String pwdError = passwordRecognizer.PasswordRecognizer.evaluatePassword(adminPassword1);
+		if (!pwdError.isEmpty()) {
+			showAlert("Weak Password", pwdError);
+			return;
+		}
+		
+		// --- CHECK 4: Do Passwords Match? ---
 		if (adminPassword1.compareTo(adminPassword2) == 0) {
         	// Create the passwords and proceed to the user home page
         	User user = new User(adminUsername, adminPassword1, "", "", "", "", "", true, false, 
@@ -148,6 +170,15 @@ public class ControllerFirstAdmin {
 			ViewFirstAdmin.label_PasswordsDoNotMatch.setText(
 					"The two passwords must match. Please try again!");
 		}
+	}
+	
+	// Helper method to display error alerts cleanly
+	private static void showAlert(String header, String content) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Account Setup Error");
+		alert.setHeaderText(header);
+		alert.setContentText(content);
+		alert.showAndWait();
 	}
 	
 	

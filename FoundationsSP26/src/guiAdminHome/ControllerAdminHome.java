@@ -56,36 +56,45 @@ public class ControllerAdminHome {
 	 * <p> Description: Protected method to send an email inviting a potential user to establish
 	 * an account and a specific role. </p>
 	 */
-	protected static void performInvitation () {
-		// Verify that the email address is valid - If not alert the user and return
+	protected static void performInvitation() {
 		String emailAddress = ViewAdminHome.text_InvitationEmailAddress.getText();
-		if (invalidEmailAddress(emailAddress)) {
+		
+		// --- CHECK 1: Length Validation ---
+		String valMsg = entityClasses.InputUtils.validateInput(emailAddress, 100, "Email Address");
+		if (!valMsg.isEmpty()) {
+			ViewAdminHome.alertEmailError.setContentText(valMsg);
+			ViewAdminHome.alertEmailError.showAndWait();
 			return;
 		}
-		
-		// Check to ensure that we are not sending a second message with a new invitation code to
-		// the same email address.  
-		if (theDatabase.emailaddressHasBeenUsed(emailAddress)) {
-			ViewAdminHome.alertEmailError.setContentText(
-					"An invitation has already been sent to this email address.");
+
+		// --- CHECK 2: FSM Email Validation (Task 8/10) ---
+		String emailError = emailAddressRecognizer.EmailAddressRecognizer.checkForValidEmailAddress(emailAddress);
+		if (!emailError.isEmpty()) {
+			ViewAdminHome.alertEmailError.setContentText("Invalid Email: " + emailError);
 			ViewAdminHome.alertEmailError.showAndWait();
 			return;
 		}
 		
-		// Inform the user that the invitation has been sent and display the invitation code
+		// --- CHECK 3: Duplicate Check ---
+		if (theDatabase.emailaddressHasBeenUsed(emailAddress)) {
+			ViewAdminHome.alertEmailError.setContentText("An invitation has already been sent to this email address.");
+			ViewAdminHome.alertEmailError.showAndWait();
+			return;
+		}
+		
+		// --- SUCCESS: Send Invitation ---
 		String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
-		String invitationCode = theDatabase.generateInvitationCode(emailAddress,
-				theSelectedRole);
-		String msg = "Code: " + invitationCode + " for role " + theSelectedRole + 
-				" was sent to: " + emailAddress;
+		String invitationCode = theDatabase.generateInvitationCode(emailAddress, theSelectedRole);
+		
+		String msg = "Code: " + invitationCode + " for role " + theSelectedRole + " was sent to: " + emailAddress;
 		System.out.println(msg);
+		
 		ViewAdminHome.alertEmailSent.setContentText(msg);
 		ViewAdminHome.alertEmailSent.showAndWait();
 		
-		// Update the Admin Home pages status
+		// Cleanup
 		ViewAdminHome.text_InvitationEmailAddress.setText("");
-		ViewAdminHome.label_NumberOfInvitations.setText("Number of outstanding invitations: " + 
-				theDatabase.getNumberOfInvitations());
+		ViewAdminHome.label_NumberOfInvitations.setText("Number of outstanding invitations: " + theDatabase.getNumberOfInvitations());
 	}
 	
 	/**********
@@ -134,7 +143,7 @@ public class ControllerAdminHome {
     /**********
 	 * <p> 
 	 * 
-	 * Title: setOnetimePassword () Method. </p>///////////////////////////////////////////////////////////////////////////////////////////////
+	 * Title: setOnetimePassword () Method. </p>
 	 * 
 	 * <p> Description: This method handles the "Set a One Time Password" button click. </p>
 	 */
@@ -156,28 +165,7 @@ public class ControllerAdminHome {
 		guiAddRemoveRoles.ViewAddRemoveRoles.displayAddRemoveRoles(ViewAdminHome.theStage, 
 				ViewAdminHome.theUser);
 	}
-	
-	/**********
-	 * <p> 
-	 * 
-	 * Title: invalidEmailAddress () Method. </p>
-	 * 
-	 * <p> Description: Protected method that is intended to check an email address before it is
-	 * used to reduce errors.  The code currently only checks to see that the email address is not
-	 * empty.  In the future, a syntactic check must be performed and maybe there is a way to check
-	 * if a properly email address is active.</p>
-	 * 
-	 * @param emailAddress	This String holds what is expected to be an email address
-	 */
-	protected static boolean invalidEmailAddress(String emailAddress) {
-		if (emailAddress.length() == 0) {
-			ViewAdminHome.alertEmailError.setContentText(
-					"Correct the email address and try again.");
-			ViewAdminHome.alertEmailError.showAndWait();
-			return true;
-		}
-		return false;
-	}
+
 	
 	/**********
 	 * <p> 

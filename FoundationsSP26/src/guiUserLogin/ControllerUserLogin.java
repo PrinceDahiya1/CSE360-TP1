@@ -73,16 +73,31 @@ public class ControllerUserLogin {
 		String password = ViewUserLogin.text_Password.getText();
     	boolean loginResult = false;
     	
+    	// --- CHECK 1: Input Validation Framework (Task 4) ---
+    	// Added this block to prevent crashes from massive inputs
+    	String valMsg = entityClasses.InputUtils.validateInput(username, 50, "Username");
+    	if (!valMsg.isEmpty()) {
+    		ViewUserLogin.alertUsernamePasswordError.setContentText(valMsg);
+    		ViewUserLogin.alertUsernamePasswordError.showAndWait();
+    		return;
+    	}
+    	
+    	valMsg = entityClasses.InputUtils.validateInput(password, 50, "Password");
+    	if (!valMsg.isEmpty()) {
+    		ViewUserLogin.alertUsernamePasswordError.setContentText(valMsg);
+    		ViewUserLogin.alertUsernamePasswordError.showAndWait();
+    		return;
+    	}
+    	// ----------------------------------------------------
+    	
 		// Fetch the user and verify the username
      	if (theDatabase.getUserAccountDetails(username) == false) {
-     		// Don't provide too much information.  Don't say the username is invalid or the
-     		// password is invalid.  Just say the pair is invalid.
+     		// Don't provide too much information.
     		ViewUserLogin.alertUsernamePasswordError.setContentText(
     				"Incorrect username/password. Try again!");
     		ViewUserLogin.alertUsernamePasswordError.showAndWait();
     		return;
     	}
-		// System.out.println("*** Username is valid");
 		
 		// Check to see that the login password matches the account password
     	String actualPassword = theDatabase.getCurrentPassword();
@@ -93,23 +108,19 @@ public class ControllerUserLogin {
     		ViewUserLogin.alertUsernamePasswordError.showAndWait();
     		return;
     	}
-		// System.out.println("*** Password is valid for this user");
 		
 		// Establish this user's details
-		// NOTE: We retrieve the user from the full list to ensure we get the correct "isOTP" flag
-    	User user = null;
-    	for (User u : theDatabase.getAllUsers()) {
+    	entityClasses.User user = null;
+    	for (entityClasses.User u : theDatabase.getAllUsers()) {
     		if (u.getUserName().equals(username)) {
     			user = u;
     			break;
     		}
     	}
     	
-    	// Fallback if loop fails (should not happen if getUserAccountDetails passed)
     	if (user == null) return;
     	
     	// --- OTP SECURITY CHECK ---
-    	// If the user has a One-Time Password active, they MUST update it now.
     	if (user.getHasOTP()) {
     		System.out.println("OTP Detected for user: " + username);
     		
@@ -121,38 +132,28 @@ public class ControllerUserLogin {
             
             // Redirect to User Update Page immediately
             guiUserUpdate.ViewUserUpdate.displayUserUpdate(theStage, user);
-            return; // Stop the login process here
+            return; 
     	}
     	
     	// See which home page dispatch to use
 		int numberOfRoles = theDatabase.getNumberOfRoles(user);		
-		// System.out.println("*** The number of roles: "+ numberOfRoles);
+		
 		if (numberOfRoles == 1) {
-			// Single Account Home Page - The user has no choice here
-			
-			// Admin role
+			// Single Account Home Page
 			if (user.getAdminRole()) {
-				loginResult = theDatabase.loginAdmin(user);
-				if (loginResult) {
+				if (theDatabase.loginAdmin(user)) 
 					guiAdminHome.ViewAdminHome.displayAdminHome(theStage, user);
-				}
 			} else if (user.getNewRole1()) {
-				loginResult = theDatabase.loginRole1(user);
-				if (loginResult) {
+				if (theDatabase.loginRole1(user)) 
 					guiRole1.ViewRole1Home.displayRole1Home(theStage, user);
-				}
 			} else if (user.getNewRole2()) {
-				loginResult = theDatabase.loginRole2(user);
-				if (loginResult) {
+				if (theDatabase.loginRole2(user)) 
 					guiRole2.ViewRole2Home.displayRole2Home(theStage, user);
-				}
-				// Other roles
 			} else {
 				System.out.println("***** UserLogin goToUserHome request has an invalid role");
 			}
 		} else if (numberOfRoles > 1) {
-			// Multiple Account Home Page - The user chooses which role to play
-			// System.out.println("*** Going to displayMultipleRoleDispatch");
+			// Multiple Account Home Page
 			guiMultipleRoleDispatch.ViewMultipleRoleDispatch.
 				displayMultipleRoleDispatch(theStage, user);
 		}

@@ -267,84 +267,78 @@ public class ViewUserUpdate {
         setupLabelUI(label_FirstName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 200);
         setupLabelUI(label_CurrentFirstName, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 200);
         setupButtonUI(button_UpdateFirstName, "Dialog", 18, 275, Pos.CENTER, 500, 193);
-        button_UpdateFirstName.setOnAction((_) -> {result = dialogUpdateFirstName.showAndWait();
-        	result.ifPresent(_ -> theDatabase.updateFirstName(theUser.getUserName(), result.get()));
-        	theDatabase.getUserAccountDetails(theUser.getUserName());
-         	String newName = theDatabase.getCurrentFirstName();
-           	theUser.setFirstName(newName);
-        	if (newName == null || newName.length() < 1)label_CurrentFirstName.setText("<none>");
-        	else label_CurrentFirstName.setText(newName);
-         	});
+        button_UpdateFirstName.setOnAction((_) -> {
+            result = dialogUpdateFirstName.showAndWait();
+            result.ifPresent(newName -> {
+                if (ControllerUserUpdate.attemptUpdateName(theUser, newName, "First Name")) {
+                    label_CurrentFirstName.setText(newName);
+                }
+            });
+        });
                
         // Middle Name
         setupLabelUI(label_MiddleName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 250);
         setupLabelUI(label_CurrentMiddleName, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 250);
         setupButtonUI(button_UpdateMiddleName, "Dialog", 18, 275, Pos.CENTER, 500, 243);
-        button_UpdateMiddleName.setOnAction((_) -> {result = dialogUpdateMiddleName.showAndWait();
-    		result.ifPresent(_ -> theDatabase.updateMiddleName(theUser.getUserName(), result.get()));
-    		theDatabase.getUserAccountDetails(theUser.getUserName());
-    		String newName = theDatabase.getCurrentMiddleName();
-           	theUser.setMiddleName(newName);
-        	if (newName == null || newName.length() < 1)label_CurrentMiddleName.setText("<none>");
-        	else label_CurrentMiddleName.setText(newName);
-    		});
+        button_UpdateMiddleName.setOnAction((_) -> {
+            result = dialogUpdateMiddleName.showAndWait();
+            result.ifPresent(newName -> {
+                if (ControllerUserUpdate.attemptUpdateName(theUser, newName, "Middle Name")) {
+                    label_CurrentMiddleName.setText(newName);
+                }
+            });
+        });
         
         // Last Name
         setupLabelUI(label_LastName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 300);
         setupLabelUI(label_CurrentLastName, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 300);
         setupButtonUI(button_UpdateLastName, "Dialog", 18, 275, Pos.CENTER, 500, 293);
-        button_UpdateLastName.setOnAction((_) -> {result = dialogUpdateLastName.showAndWait();
-    		result.ifPresent(_ -> theDatabase.updateLastName(theUser.getUserName(), result.get()));
-    		theDatabase.getUserAccountDetails(theUser.getUserName());
-    		String newName = theDatabase.getCurrentLastName();
-           	theUser.setLastName(newName);
-      	if (newName == null || newName.length() < 1)label_CurrentLastName.setText("<none>");
-        	else label_CurrentLastName.setText(newName);
-    		});
+        button_UpdateLastName.setOnAction((_) -> {
+            result = dialogUpdateLastName.showAndWait();
+            result.ifPresent(newName -> {
+                if (ControllerUserUpdate.attemptUpdateName(theUser, newName, "Last Name")) {
+                    label_CurrentLastName.setText(newName);
+                }
+            });
+        });
         
         // Preferred First Name
-        setupLabelUI(label_PreferredFirstName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 
-        		5, 350);
-        setupLabelUI(label_CurrentPreferredFirstName, "Arial", 18, 260, Pos.BASELINE_LEFT, 
-        		200, 350);
+        setupLabelUI(label_PreferredFirstName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 350);
+        setupLabelUI(label_CurrentPreferredFirstName, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 350);
         setupButtonUI(button_UpdatePreferredFirstName, "Dialog", 18, 275, Pos.CENTER, 500, 343);
-        button_UpdatePreferredFirstName.setOnAction((_) -> 
-        	{result = dialogUpdatePreferredFirstName.showAndWait();
-    		result.ifPresent(_ -> 
-    		theDatabase.updatePreferredFirstName(theUser.getUserName(), result.get()));
-    		theDatabase.getUserAccountDetails(theUser.getUserName());
-    		String newName = theDatabase.getCurrentPreferredFirstName();
-           	theUser.setPreferredFirstName(newName);
-         	if (newName == null || newName.length() < 1)label_CurrentPreferredFirstName.setText("<none>");
-        	else label_CurrentPreferredFirstName.setText(newName);
-     		});
+        button_UpdatePreferredFirstName.setOnAction((_) -> {
+            result = dialogUpdatePreferredFirstName.showAndWait();
+            result.ifPresent(newName -> {
+                if (ControllerUserUpdate.attemptUpdateName(theUser, newName, "Preferred Name")) {
+                    label_CurrentPreferredFirstName.setText(newName);
+                }
+            });
+        });
         
         // Email Address
         setupLabelUI(label_EmailAddress, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 400);
         setupLabelUI(label_CurrentEmailAddress, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 400);
         setupButtonUI(button_UpdateEmailAddress, "Dialog", 18, 275, Pos.CENTER, 500, 393);
-        button_UpdateEmailAddress.setOnAction((_) -> {result = dialogUpdateEmailAddresss.showAndWait();
-    		result.ifPresent(_ -> theDatabase.updateEmailAddress(theUser.getUserName(), result.get()));
-    		theDatabase.getUserAccountDetails(theUser.getUserName());
-    		String newEmail = theDatabase.getCurrentEmailAddress();
-           	theUser.setEmailAddress(newEmail);
-        	if (newEmail == null || newEmail.length() < 1)label_CurrentEmailAddress.setText("<none>");
-        	else label_CurrentEmailAddress.setText(newEmail);
- 			});
+        button_UpdateEmailAddress.setOnAction((_) -> {
+            result = dialogUpdateEmailAddresss.showAndWait();
+            result.ifPresent(newEmail -> {
+                if (ControllerUserUpdate.attemptUpdateEmail(theUser, newEmail)) {
+                    label_CurrentEmailAddress.setText(newEmail);
+                }
+            });
+        });
         
         //Update Password
         button_UpdatePassword.setOnAction((event) -> {
             result = dialogUpdatePassword.showAndWait();
             result.ifPresent(newPwd -> {
-                // 1. Update Database (clears OTP flag)
-                theDatabase.updatePassword(theUser.getUserName(), newPwd);
-
-                // 2. Update Local Object (so the app knows it changed immediately)
-                theUser.setPassword(newPwd);
-                theUser.setHasOTP(false); 
-
-                // 3. Update UI Label
-                label_CurrentPassword.setText(newPwd);
+                // Call the Controller to validate and save
+                boolean success = ControllerUserUpdate.attemptUpdatePassword(theUser, newPwd);
+                
+                // Only update the UI label if the controller said it was valid/saved
+                if (success) {
+                    label_CurrentPassword.setText(newPwd);
+                }
             });
         });
         

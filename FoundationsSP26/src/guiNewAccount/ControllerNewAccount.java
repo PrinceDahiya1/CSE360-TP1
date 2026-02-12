@@ -64,91 +64,84 @@ public class ControllerNewAccount {
 	 * 
 	 */	
 	protected static void doCreateUser() {
-		
-		// Fetch the username and password. (We use the first of the two here, but we will validate
-		// that the two password fields are the same before we do anything with it.)
-		String username = ViewNewAccount.text_Username.getText();
-		String password = ViewNewAccount.text_Password1.getText();
-		
-		// Task 8 Integration: Validate using a Label (Same Window)
-		// FSM logic is called here to prevent invalid data from reaching the database
-		String errorMessage = UserNameRecognizer.checkForValidUserName(username);
+        // 1. Fetch Inputs
+        String username = ViewNewAccount.text_Username.getText();
+        String password = ViewNewAccount.text_Password1.getText();
+        String passwordRepeat = ViewNewAccount.text_Password2.getText();
+        
+        // --- CHECK 1: Length Validation (Prevents Crashes) ---
+        String valMsg = entityClasses.InputUtils.validateInput(username, 50, "Username");
+        if (!valMsg.isEmpty()) { showAlert(valMsg); return; }
+        
+        valMsg = entityClasses.InputUtils.validateInput(password, 50, "Password");
+        if (!valMsg.isEmpty()) { showAlert(valMsg); return; }
 
-		if (errorMessage.length() > 0) {
-		    // 1. Set the specific error message from the FSM logic
-		    ViewNewAccount.alertUserNameError.setContentText(errorMessage);
-		    
-		    // 2. Show the alert (using the View's static object)
-		    ViewNewAccount.alertUserNameError.showAndWait();
-		    
-		    return; // Stop the account creation process
-		}
-		
-		// Display key information to the log
-		System.out.println("** Account for Username: " + username + "; theInvitationCode: "+
-				ViewNewAccount.theInvitationCode + "; email address: " + 
-				ViewNewAccount.emailAddress + "; Role: " + ViewNewAccount.theRole);
-		
-		// Initialize local variables that will be created during this process
-		int roleCode = 0;
-		User user = null;
+        // --- CHECK 2: USERNAME RECOGNIZER (Only for New Accounts!) ---
+        String uNameError = userNameRecognizerTestbed.UserNameRecognizer.checkForValidUserName(username);
+        if (uNameError.length() > 0) {
+            showAlert("Invalid Username: " + uNameError);
+            return;
+        }
 
-		// Make sure the two passwords are the same.	
-		if (ViewNewAccount.text_Password1.getText().
-				compareTo(ViewNewAccount.text_Password2.getText()) == 0) {
-			
-			// The passwords match so we will set up the role and the User object base on the 
-			// information provided in the invitation
-			if (ViewNewAccount.theRole.compareTo("Admin") == 0) {
-				roleCode = 1;
-				user = new User(username, password, "", "", "", "", "", true, false, false, false);
-			} else if (ViewNewAccount.theRole.compareTo("Role1") == 0) {
-				roleCode = 2;
-				user = new User(username, password, "", "", "", "", "", false, true, false, false);
-			} else if (ViewNewAccount.theRole.compareTo("Role2") == 0) {
-				roleCode = 3;
-				user = new User(username, password, "", "", "", "", "", false, false, true, false);
-			} else {
-				System.out.println(
-						"**** Trying to create a New Account for a role that does not exist!");
-				System.exit(0);
-			}
-			
-			// Unlike the FirstAdmin, we know the email address, so set that into the user as well.
-        	user.setEmailAddress(ViewNewAccount.emailAddress);
+        // --- CHECK 3: PASSWORD FSM RECOGNIZER (Using your Model.java logic) ---
+        String pwdError = passwordRecognizer.PasswordRecognizer.evaluatePassword(password);
+        if (!pwdError.isEmpty()) {
+            showAlert("Weak Password:\n" + pwdError);
+            return;
+        }
+        
+        // --- CHECK 4: Do Passwords Match? ---
+        if (!password.equals(passwordRepeat)) {
+            showAlert("Passwords do not match.");
+            ViewNewAccount.text_Password1.setText("");
+            ViewNewAccount.text_Password2.setText("");
+            return;
+        }
 
-        	// Inform the system about which role will be played
-			applicationMain.FoundationsMain.activeHomePage = roleCode;
-			
-        	// Create the account based on user and proceed to the user account update page
-            try {
-            	// Create a new User object with the pre-set role and register in the database
-            	theDatabase.register(user);
-            } catch (SQLException e) {
-                System.err.println("*** ERROR *** Database error: " + e.getMessage());
-                e.printStackTrace();
-                System.exit(0);
-            }
-            
-            // The account has been set, so remove the invitation from the system
-            theDatabase.removeInvitationAfterUse(
-            		ViewNewAccount.text_Invitation.getText());
-            
-            // Set the database so it has this user and the current user
-            theDatabase.getUserAccountDetails(username);
+        // --- SUCCESS: Create the User ---
+        // (This part remains the same as your original code)
+        System.out.println("** Creating Account for: " + username);
+        
+        int roleCode = 0;
+        entityClasses.User user = null;
 
-            // Navigate to the Welcome Login Page
-            guiUserUpdate.ViewUserUpdate.displayUserUpdate(ViewNewAccount.theStage, user);
-		}
-		else {
-			// The two passwords are NOT the same, so clear the passwords, explain the passwords
-			// must be the same, and clear the message as soon as the first character is typed.
-			ViewNewAccount.text_Password1.setText("");
-			ViewNewAccount.text_Password2.setText("");
-			ViewNewAccount.alertUsernamePasswordError.showAndWait();
-		}
-	}
+        if (ViewNewAccount.theRole.compareTo("Admin") == 0) {
+            roleCode = 1;
+            user = new entityClasses.User(username, password, "", "", "", "", "", true, false, false, false);
+        } else if (ViewNewAccount.theRole.compareTo("Role1") == 0) {
+            roleCode = 2;
+            user = new entityClasses.User(username, password, "", "", "", "", "", false, true, false, false);
+        } else if (ViewNewAccount.theRole.compareTo("Role2") == 0) {
+            roleCode = 3;
+            user = new entityClasses.User(username, password, "", "", "", "", "", false, false, true, false);
+        } else {
+            System.out.println("**** Error: Unknown Role");
+            System.exit(0);
+        }
+        
+        user.setEmailAddress(ViewNewAccount.emailAddress);
+        applicationMain.FoundationsMain.activeHomePage = roleCode;
+        
+        try {
+        	applicationMain.FoundationsMain.database.register(user);
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+        
+        // Cleanup
+        applicationMain.FoundationsMain.database.removeInvitationAfterUse(ViewNewAccount.text_Invitation.getText());
+        applicationMain.FoundationsMain.database.getUserAccountDetails(username);
+        guiUserUpdate.ViewUserUpdate.displayUserUpdate(ViewNewAccount.theStage, user);
+    }
 
+    // Helper to keep code clean
+    private static void showAlert(String content) {
+        ViewNewAccount.alertUserNameError.setTitle("Validation Error");
+        ViewNewAccount.alertUserNameError.setHeaderText("Input Error");
+        ViewNewAccount.alertUserNameError.setContentText(content);
+        ViewNewAccount.alertUserNameError.showAndWait();
+    }
 	
 	/**********
 	 * <p> Method: public performQuit() </p>
