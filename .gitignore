@@ -4,6 +4,9 @@
 .settings/
 bin/
 
+#Folder
+HW2/
+
 # Mac/Windows System files
 .DS_Store
 Thumbs.db
