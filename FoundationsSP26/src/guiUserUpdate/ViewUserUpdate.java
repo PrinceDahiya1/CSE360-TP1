@@ -204,7 +204,7 @@ public class ViewUserUpdate {
 	 * 
 	 * <p> Description: This method initializes all the elements of the graphical user interface.
 	 * This method determines the location, size, font, color, and change and event handlers for
-	 * each GUI object.</p>
+	 * each GUI object.
 	 * 
 	 * This is a singleton and is only performed once.  Subsequent uses fill in the changeable
 	 * fields using the displayUserUpdate method.</p>

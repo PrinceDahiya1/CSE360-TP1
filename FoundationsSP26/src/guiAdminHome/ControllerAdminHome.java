@@ -24,7 +24,7 @@ import database.Database;
  * 
  * @version 1.00		2025-08-17 Initial version
  * @version 1.01		2025-09-16 Update Javadoc documentation *  
- * @version 1.02		2025-02-07 Implemented the listUsers() & deleteUser() methods
+ * @version 1.02		2025-02-07 Implemented the listUsers() and deleteUser() methods
  */
 
 public class ControllerAdminHome {

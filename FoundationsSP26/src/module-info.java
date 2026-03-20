@@ -1,3 +1,6 @@
+/*
+ * Module definition for the Foundations SP26 project.
+ */
 module FoundationsF25 {
 	requires javafx.controls;
 	requires java.sql;

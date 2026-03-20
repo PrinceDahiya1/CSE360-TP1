@@ -38,27 +38,36 @@ public class ControllerUserUpdate {
 	 * @param theStage specifies the JavaFX Stage for next next GUI page and it's methods
 	 * 
 	 * @param theUser specifies the user so we go to the right page and so the right information
-	 */
+	 */	
 	protected static void goToUserHomePage(Stage theStage, User theUser) {
 		
-		// Get the roles the user selected during login
-		int theRole = applicationMain.FoundationsMain.activeHomePage;
+		// SECURITY FIX: Prevent bypassing the OTP reset
+		if (theUser.getHasOTP()) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Password Reset Required");
+			alert.setHeaderText("Action Blocked");
+			alert.setContentText("You must successfully update your password before proceeding to the home page.");
+			alert.showAndWait();
+			return; // Stops them from leaving the page
+		}
 
-		// Use that role to proceed to that role's home page
-		switch (theRole) {
-		case 1:
-			guiAdminHome.ViewAdminHome.displayAdminHome(theStage, theUser);
-			break;
-		case 2:
-			guiRole1.ViewRole1Home.displayRole1Home(theStage, theUser);
-			break;
-		case 3:
-			guiRole2.ViewRole2Home.displayRole2Home(theStage, theUser);
-			break;
-		default: 
-			System.out.println("*** ERROR *** UserUpdate goToUserHome has an invalid role: " + 
-					theRole);
-			System.exit(0);
+		// ROUTING FIX: Determine the correct page based on THIS user's roles
+		int numberOfRoles = theDatabase.getNumberOfRoles(theUser);
+		
+		if (numberOfRoles > 1) {
+			// If they have multiple roles, send them to the dispatcher
+			guiMultipleRoleDispatch.ViewMultipleRoleDispatch.displayMultipleRoleDispatch(theStage, theUser);
+		} else if (numberOfRoles == 1) {
+			// Send them to their specific single role page
+			if (theUser.getAdminRole()) {
+				guiAdminHome.ViewAdminHome.displayAdminHome(theStage, theUser);
+			} else if (theUser.getNewRole1()) {
+				guiRole1.ViewRole1Home.displayRole1Home(theStage, theUser);
+			} else if (theUser.getNewRole2()) {
+				guiRole2.ViewRole2Home.displayRole2Home(theStage, theUser);
+			}
+		} else {
+			System.out.println("*** ERROR *** User has no valid roles assigned.");
 		}
  	}
 	
