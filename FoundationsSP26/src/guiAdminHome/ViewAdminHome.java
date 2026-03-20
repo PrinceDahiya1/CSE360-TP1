@@ -176,6 +176,9 @@ public class ViewAdminHome {
 
 		// Set the role for potential users to the default (No role selected)
 		combobox_SelectRole.getSelectionModel().select(0);
+		
+		// Dynamically update the user details label for whoever just logged in
+		label_UserDetails.setText("User: " + theUser.getUserName());
 				
 		// Set the title for the window, display the page, and wait for the Admin to do something
 		theStage.setTitle("CSE 360 Foundation Code: Admin Home Page");
@@ -343,7 +346,7 @@ public class ViewAdminHome {
 	/**********
 	 * Private local method to initialize the standard fields for a text input field
 	 * 
-	 * @param b		The TextField object to be initialized
+	 * @param t		The TextField object to be initialized
 	 * @param ff	The font to be used
 	 * @param f		The size of the font to be used
 	 * @param w		The width of the Button

@@ -89,7 +89,14 @@ public class ViewMultipleRoleDispatch {
 	Constructor
 
 	 */
-
+	
+	/**
+	 * <p> Method: displayMultipleRoleDispatch </p>
+	 * <p> Description: Displays the multiple role dispatch page allowing the user to select a role.</p>
+	 * 
+	 * @param ps specifies the JavaFX Stage to be used for this GUI
+	 * @param user specifies the User whose roles will be displayed
+	 */	
 	public static void displayMultipleRoleDispatch(Stage ps, User user) {
 		
 		// Establish the references to the GUI and the current user
@@ -130,12 +137,7 @@ public class ViewMultipleRoleDispatch {
 	 * 
 	 * <p> Description: This method initializes all the elements of the graphical user interface.
 	 * This method determines the location, size, font, color, and change and event handlers for
-	 * each GUI object. </p>
-	 * 
-	 * @param ps specifies the JavaFX Stage to be used for this GUI and it's methods
-	 * 
-	 * @param user specifies the User for this GUI and it's methods
-	 * 
+	 * each GUI object. </p> 
 	 */
 	private ViewMultipleRoleDispatch() {
 
@@ -191,6 +193,14 @@ public class ViewMultipleRoleDispatch {
 
 	/**********
 	 * Private local method to initialize the standard fields for a label
+	 * 
+	 * @param l		The Label object to be initialized
+	 * @param ff	The font to be used
+	 * @param f		The size of the font to be used
+	 * @param w		The width of the Label
+	 * @param p		The alignment (e.g. left, centered, or right)
+	 * @param x		The location from the left edge (x axis)
+	 * @param y		The location from the top (y axis)
 	 */
 
 	private static void setupLabelUI(Label l, String ff, double f, double w, Pos p, double x, double y){

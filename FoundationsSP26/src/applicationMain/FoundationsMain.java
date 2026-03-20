@@ -117,7 +117,7 @@ public class FoundationsMain extends Application {
 	 * command line parameters, if needed.  This application does not use them.  If they are
 	 * provided, the application will ignore them.</p>
 	 * 
-	 * @param String[] args   The array of command lines parameters.  These are not used.
+	 * @param args   The array of command lines parameters.  These are not used.
 	 */
 	public static void main(String[] args) {
 		launch(args);	// The launch method loads JavaFX and invokes its initialization.  When it
