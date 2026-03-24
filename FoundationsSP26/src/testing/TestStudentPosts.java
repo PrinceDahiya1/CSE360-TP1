@@ -387,58 +387,94 @@ public class TestStudentPosts {
     }
 
 
+
     // =========================================================================
     // TEST SUITE 6: Delete Post — Soft Delete (REQ-5, REQ-12)
     // =========================================================================
-
+ 
     /*******
      * <p> Method: testDeletePost() </p>
-     * <p> Description: Tests softDeletePost(). Verifies the post is removed from
-     * getAllPosts() but still exists in the DB (isDeleted=true), and that any replies
-     * are NOT deleted. Covers REQ-5 and REQ-12. </p>
+     * <p> Description: Tests softDeletePost() behavior against all spec requirements.
+     * Verifies that: (1) the post is soft-deleted not hard-deleted, (2) the isDeleted
+     * flag is set so the View can show a [DELETED] tag, (3) the original title is
+     * preserved in the DB so the View can display "[DELETED] originalTitle", (4) the
+     * body content is unchanged in DB — the View substitutes the deletion notice at
+     * display time without overwriting the DB, and (5) replies are fully intact.
+     * Covers REQ-5 and REQ-12. </p>
      *
-     * <p> How to interpret output: PASS means soft delete worked correctly — post
-     * disappears from the main list but replies survive. FAIL means either the post
-     * was hard-deleted (replies gone too) or it still shows in getAllPosts(). </p>
+     * <p> How to interpret output: PASS means soft delete worked correctly. A FAIL on
+     * 6.2-6.6 means the DB record was corrupted or hard-deleted. A FAIL on 6.7-6.9
+     * means replies were incorrectly removed. </p>
      */
     private static void testDeletePost() {
         System.out.println("--- Suite 6: Soft Delete Post (REQ-5, REQ-12) ---");
-
+ 
         try {
-            // First add a reply to bob's post so we can verify it survives deletion
+            // Get bob's post to delete
             ArrayList<Post> posts = db.getAllPosts();
             Post bobsPost = posts.stream()
                     .filter(p -> p.getAuthorUsername().equals("bob"))
                     .findFirst().orElse(null);
             if (bobsPost == null) { check("6.x Setup: bob's post not found", false); return; }
-
+ 
+            // Add a reply first so we can verify it survives the deletion
             Post reply = new Post("Re: Tip: always initialize your ArrayList",
                     "Thanks, this helped!", "alice", "STATEMENT", bobsPost.getId());
             db.createPost(reply);
-
-            // Verify reply exists before delete
+ 
+            // Confirm reply exists before we delete the parent
             check("6.1 Reply exists before parent is deleted",
                     db.getRepliesForPost(bobsPost.getId()).size() == 1);
-
-            // Soft delete bob's post
+ 
+            // Perform the soft delete
             db.softDeletePost(bobsPost.getId());
-
-            // Should no longer appear in getAllPosts()
+ 
+            // Fetch the post back from DB to inspect its state
+            Post deletedPost = db.getPostById(bobsPost.getId());
+ 
+            // 6.2: Record still exists in DB (soft delete, not hard delete)
+            check("6.2 Post record still exists in DB after deletion (soft delete)",
+                    deletedPost != null);
+ 
+            // 6.3: isDeleted flag is TRUE - View uses this to show [DELETED] tag in list
+            check("6.3 isDeleted flag is TRUE — View shows [DELETED] tag in list",
+                    deletedPost != null && deletedPost.isDeleted());
+ 
+            // 6.4: Post appears in getAllPosts() so View can render the deletion notice
+            // (getAllPosts shows deleted posts that have replies per our spec)
             ArrayList<Post> afterDelete = db.getAllPosts();
-            boolean stillInList = afterDelete.stream()
-                    .anyMatch(p -> p.getId() == bobsPost.getId());
-            check("6.2 Deleted post no longer appears in getAllPosts()",
-                    !stillInList);
-
-            // But getPostById still finds it with isDeleted=true
-            Post deleted = db.getPostById(bobsPost.getId());
-            check("6.3 Deleted post still exists in DB with isDeleted=true",
-                    deleted != null && deleted.isDeleted());
-
-            // Reply is NOT deleted — it's still there
-            check("6.4 Reply survives parent post deletion (per user story spec)",
-                    db.getRepliesForPost(bobsPost.getId()).size() == 1);
-
+            Post inList = afterDelete.stream()
+                    .filter(p -> p.getId() == bobsPost.getId())
+                    .findFirst().orElse(null);
+            check("6.4 Deleted post visible in list so View can render deletion notice",
+                    inList != null && inList.isDeleted());
+ 
+            // 6.5: Original title preserved - View prepends [DELETED] to display it
+            check("6.5 Original title preserved in DB (View prepends [DELETED] at display time)",
+                    deletedPost != null && deletedPost.getTitle().equals(bobsPost.getTitle()));
+ 
+            // 6.6: Body content unchanged in DB - View substitutes the deletion notice
+            // at display time without overwriting the stored content. This is by design:
+            // if the post were ever un-deleted, the original content would be recoverable.
+            check("6.6 Body content unchanged in DB (View substitutes deletion notice at runtime)",
+                    deletedPost != null && deletedPost.getBody().equals(bobsPost.getBody()));
+ 
+            // 6.7: Replies are NOT deleted - per user story: "any replies to that post
+            // are not deleted, but anyone viewing the reply will see a message saying
+            // that the original post has been deleted"
+            ArrayList<Post> repliesAfter = db.getRepliesForPost(bobsPost.getId());
+            check("6.7 All replies survive parent post deletion (per user story spec)",
+                    repliesAfter.size() == 1);
+ 
+            // 6.8: Reply body is unchanged
+            check("6.8 Reply body unchanged after parent deletion",
+                    repliesAfter.get(0).getBody().equals("Thanks, this helped!"));
+ 
+            // 6.9: Reply isDeleted flag remains false - replies are never soft-deleted
+            // when a parent is deleted
+            check("6.9 Reply isDeleted flag is false - replies are never auto-deleted",
+                    !repliesAfter.get(0).isDeleted());
+ 
         } catch (Exception e) {
             failWithException("6.x Delete post threw unexpected exception", e);
         }
