@@ -398,7 +398,7 @@ public class TestStudentPosts {
      * Verifies that: (1) the post is soft-deleted not hard-deleted, (2) the isDeleted
      * flag is set so the View can show a [DELETED] tag, (3) the original title is
      * preserved in the DB so the View can display "[DELETED] originalTitle", (4) the
-     * body content is unchanged in DB — the View substitutes the deletion notice at
+     * body content is unchanged in DB - the View substitutes the deletion notice at
      * display time without overwriting the DB, and (5) replies are fully intact.
      * Covers REQ-5 and REQ-12. </p>
      *
