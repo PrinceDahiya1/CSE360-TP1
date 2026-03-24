@@ -11,6 +11,9 @@ import entityClasses.Post;
  * logic and database calls for student post CRUD operations, read tracking, and search.
  * The View and Controller never talk to the database directly — they go through here. </p>
  *
+ * <p> <b>Testing:</b> The database interactions and state changes managed by this class 
+ * are validated by the JUnit test suite in {@link testing.TestStudentPosts}. </p>
+ *
  * @author Prince Dahiya
  * @author Sumukh Gowda
  * @author Klim Savalia
@@ -150,7 +153,7 @@ public class ModelStudentPosts {
         if (!existing.getAuthorUsername().equals(loggedInUsername))
             return "You can only delete your own posts.";
 
-        // Soft delete — sets isDeleted=TRUE, replies are NOT removed
+        // Soft delete - sets isDeleted=TRUE, replies are NOT removed
         theDatabase.softDeletePost(postId);
         return "";
     }

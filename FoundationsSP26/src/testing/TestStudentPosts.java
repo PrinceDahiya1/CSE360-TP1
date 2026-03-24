@@ -14,7 +14,7 @@ import entityClasses.Post;
  *
  * Each test prints a PASS or FAIL result to the console with a short explanation. Negative
  * tests (testing that invalid inputs are correctly rejected) are just as important as
- * positive tests — they verify the system protects itself from bad data.
+ * positive tests - they verify the system protects itself from bad data.
  *
  * To be run directly as a Java application (not as a JavaFX app). It creates its own
  * Database connection to a separate test database so it doesn't corrupt live data. The

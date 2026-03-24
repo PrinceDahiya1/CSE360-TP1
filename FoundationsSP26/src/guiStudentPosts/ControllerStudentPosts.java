@@ -17,6 +17,9 @@ import java.util.Optional;
  * <p> Like other controllers in this project, this class is not instantiated — it's a
  * collection of protected static methods. Do not change these to public. </p>
  *
+ * <p> <b>Testing:</b> The database interactions and state changes managed by this class 
+ * are validated by the JUnit test suite in {@link testing.TestStudentPosts}. </p>
+ *
  * @author Prince Dahiya
  * @author Sumukh Gowda
  * @author Klim Savalia
@@ -232,7 +235,7 @@ public class ControllerStudentPosts {
     /*******
      * <p> Method: performDelete() </p>
      * <p> Description: Shows an "Are you sure?" confirmation dialog before soft-deleting
-     * the post. Replies are NOT deleted — they remain visible with a deletion notice per
+     * the post. Replies are NOT deleted - they remain visible with a deletion notice per
      * the user story. Clears input fields if the user was mid-edit. </p>
      */
     protected static void performDelete() {

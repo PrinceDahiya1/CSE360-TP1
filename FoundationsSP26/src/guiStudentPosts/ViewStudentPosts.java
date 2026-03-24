@@ -74,7 +74,7 @@ public class ViewStudentPosts {
     protected static Line line_Sep2 = new Line(20, 415, width - 20, 415);
 
     // --- Area 3: Input fields ---
-    protected static Label            label_TitleInput  = new Label("Title:");
+    protected static Label 			  label_TitleInput  = new Label("Title:");
     protected static TextField        text_TitleInput   = new TextField();
     protected static Label            label_TypeInput   = new Label("Type:");
     // Students post QUESTION or STATEMENT per the user stories
@@ -207,7 +207,7 @@ public class ViewStudentPosts {
         textArea_BodyInput.setPrefSize(720, 52);
         textArea_BodyInput.setWrapText(true);
 
-        // Error label below the body field — full width so it never clips
+        // Error label below the body field - full width so it never clips
         setupLabelUI(label_ErrorMsg, "Arial", 11, width - 40, Pos.BASELINE_LEFT, 20, 503);
         label_ErrorMsg.setStyle("-fx-text-fill: red;");
 
@@ -268,14 +268,14 @@ public class ViewStudentPosts {
         ObservableList<String> items = FXCollections.observableArrayList();
         for (Post p : posts)
             items.add(model.buildDisplayString(p, username));
-        // Suppress listener during setItems — JavaFX fires it mid-swap when list size
+        // Suppress listener during setItems - JavaFX fires it mid-swap when list size
         // is 0, causing IndexOutOfBoundsException. Flag blocks it, re-enables after.
         suppressSelection = true;
         listView_Posts.setItems(items);
         suppressSelection = false;
         // NOTE: clearDetailView() intentionally NOT called here.
         // populatePostList is also used by refreshCurrentList() which runs after
-        // a post is selected — calling clearDetailView() here would wipe the detail panel.
+        // a post is selected - calling clearDetailView() here would wipe the detail panel.
         // Callers that need a full reset (loadAllPosts, search, myPosts) call clearDetailView() themselves.
     }
 

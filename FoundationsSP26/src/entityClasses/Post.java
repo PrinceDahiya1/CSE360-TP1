@@ -22,6 +22,9 @@ import java.time.format.DateTimeFormatter;
  *
  * <p> isInstructorEndorsed and staffComment are included for TP3 Staff Epics so we
  * don't need a schema change later. </p>
+ * 
+ * <p> <b>Testing:</b> The CRUD and validation methods in this class are directly validated 
+ * by the automated tests in {@link testing.TestStudentPosts}. </p>
  *
  * @author Prince Dahiya
  * @author Sumukh Gowda

@@ -31,6 +31,8 @@ import entityClasses.Post;
  * @version 2.02		2026-02-04 Added a function to return All users in the Database
  * @version 2.03		2026-02-03 Added a function to delete a user in the Database
  * @version 2.04		2026-02-08 Added and fixed logic for OTP feature
+ * @version 2.05		2026-03-23 Fixed an issue in getAllPosts() and getPostsByAuthor() which would
+ * 							make replies of soft deleted posts inaccessible 
  */
 
 /*
@@ -1277,14 +1279,17 @@ public class Database {
      * <p> Description: Returns all non-deleted top-level posts (parentPostId = -1),
      * newest first. Soft-deleted posts are filtered out of the main list.
      * Replies are fetched separately via getRepliesForPost(). </p>
+     * 
+     * <p> Also shows soft deleted posts that have replies </p>
      *
      * @return ArrayList of top-level Post objects, never null
      */
     public ArrayList<Post> getAllPosts() {
         ArrayList<Post> list = new ArrayList<>();
-        // Exclude soft-deleted posts and replies from the main list view
+        // FIX: Show the post if it is NOT deleted, OR if it has replies
         String query = "SELECT * FROM postDB WHERE parentPostId = -1 "
-                + "AND isDeleted = FALSE ORDER BY id DESC";
+                + "AND (isDeleted = FALSE OR id IN (SELECT parentPostId FROM postDB)) "
+                + "ORDER BY id DESC";
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) list.add(postFromResultSet(rs));
@@ -1300,14 +1305,19 @@ public class Database {
      * <p> Description: Returns all non-deleted top-level posts by a specific author,
      * newest first. Powers the "My Posts" view per the user story: "I can see a list
      * of my posts, the number of replies, and how many I have not yet read." </p>
+     * 
+     * <p> Also shows soft deleted posts that have replies </p>
      *
      * @param username The author's username to filter by
      * @return ArrayList of the author's top-level posts, never null
      */
     public ArrayList<Post> getPostsByAuthor(String username) {
         ArrayList<Post> list = new ArrayList<>();
+        // FIX: Show the post if it is NOT deleted, OR if it has replies
         String query = "SELECT * FROM postDB WHERE authorUsername = ? "
-                + "AND parentPostId = -1 AND isDeleted = FALSE ORDER BY id DESC";
+                + "AND parentPostId = -1 "
+                + "AND (isDeleted = FALSE OR id IN (SELECT parentPostId FROM postDB)) "
+                + "ORDER BY id DESC";
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
