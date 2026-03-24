@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import entityClasses.User;
+import entityClasses.Post;
 
 /*******
  * <p> Title: Database Class.  </p>
@@ -63,6 +64,8 @@ public class Database {
 	private boolean currentAdminRole;
 	private boolean currentNewRole1;
 	private boolean currentNewRole2;
+	
+	private String DB_URL_OVERRIDE = null;
 
 	/*******
 	 * <p> Method: Database </p>
@@ -70,9 +73,20 @@ public class Database {
 	 * <p> Description: The default constructor used to establish this singleton object.</p>
 	 * 
 	 */
-	
 	public Database () {
 		
+	}
+	
+	/*******
+    * <p> Method: Database(String) </p>
+    * <p> Description: Overloaded constructor that accepts a custom DB URL. Used by
+    * TestStudentPosts.java to connect to a separate test database so tests never
+    * touch live data. The standard constructor still uses the default URL. </p>
+    *
+    * @param dbUrl The JDBC URL for the database to connect to
+    */
+	public Database(String dbUrl) {
+	    this.DB_URL_OVERRIDE = dbUrl;
 	}
 	
 	
@@ -88,7 +102,8 @@ public class Database {
 	public void connectToDatabase() throws SQLException {
 		try {
 			Class.forName(JDBC_DRIVER); // Load the JDBC driver
-			connection = DriverManager.getConnection(DB_URL, USER, PASS);
+			connection = DriverManager.getConnection(
+				    DB_URL_OVERRIDE != null ? DB_URL_OVERRIDE : DB_URL, USER, PASS);
 			statement = connection.createStatement(); 
 			// You can use this command to clear the database and restart from fresh.
 			//statement.execute("DROP ALL OBJECTS");
@@ -129,6 +144,8 @@ public class Database {
 	    		+ "emailAddress VARCHAR(255), "
 	            + "role VARCHAR(10))";
 	    statement.execute(invitationCodesTable);
+	    createPostsTable();
+	    createReadStatusTable();
 	}
 
 
@@ -1161,4 +1178,435 @@ public class Database {
 		} 
 	}
 	
+	// ==================================================================================
+	// TP2 ADDITIONS
+	// ==================================================================================
+	//
+	// The schema has changed — new columns (thread, isDeleted) and a new table
+	// (readStatusDB). The ALTER TABLE lines handle migration so existing data isn't lost.
+	// ==================================================================================
+
+
+    /*******
+     * <p> Method: createPostsTable </p>
+     * <p> Description: Creates the postDB table if it doesn't exist. Also runs ALTER TABLE
+     * to add new columns (thread, isDeleted) in case this is an existing database from
+     * a previous run without those columns. Safe to run repeatedly — IF NOT EXISTS / IF
+     * COLUMN EXISTS guards prevent errors. </p>
+     *
+     * @throws SQLException if table creation fails
+     */
+    private void createPostsTable() throws SQLException {
+        // Create the table if it's brand new
+        String postTable = "CREATE TABLE IF NOT EXISTS postDB ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                + "title VARCHAR(200) NOT NULL, "
+                + "body VARCHAR(4000) NOT NULL, "
+                + "authorUsername VARCHAR(255) NOT NULL, "
+                + "timestamp VARCHAR(30) NOT NULL, "
+                + "postType VARCHAR(20) NOT NULL DEFAULT 'QUESTION', "
+                + "thread VARCHAR(100) DEFAULT 'General', "
+                + "parentPostId INT DEFAULT -1, "           // -1 = top-level thread
+                + "isResolved BOOL DEFAULT FALSE, "
+                + "isDeleted BOOL DEFAULT FALSE, "          // soft delete — replies stay
+                + "isInstructorEndorsed BOOL DEFAULT FALSE, " // TP3 Staff Epics
+                + "staffComment VARCHAR(1000) DEFAULT '')";   // TP3 Staff Epics
+        statement.execute(postTable);
+
+        // Migration: add new columns to existing databases that didn't have them yet
+        // H2 ignores these if the column already exists
+        try { statement.execute("ALTER TABLE postDB ADD COLUMN IF NOT EXISTS thread VARCHAR(100) DEFAULT 'General'"); }
+        catch (SQLException ignored) {}
+        try { statement.execute("ALTER TABLE postDB ADD COLUMN IF NOT EXISTS isDeleted BOOL DEFAULT FALSE"); }
+        catch (SQLException ignored) {}
+    }
+
+
+    /*******
+     * <p> Method: createReadStatusTable </p>
+     * <p> Description: Creates the readStatusDB table that tracks which posts each user
+     * has read. A post is "unread" for a user if no row exists for (username, postId).
+     * When a student clicks on a post, we insert a row to mark it read.
+     * Called from createTables() at startup. </p>
+     *
+     * @throws SQLException if table creation fails
+     */
+    private void createReadStatusTable() throws SQLException {
+        // Composite primary key prevents duplicate read entries for the same user+post
+        String readTable = "CREATE TABLE IF NOT EXISTS readStatusDB ("
+                + "username VARCHAR(255) NOT NULL, "
+                + "postId INT NOT NULL, "
+                + "PRIMARY KEY (username, postId))";
+        statement.execute(readTable);
+    }
+
+
+    /*******
+     * <p> Method: createPost(Post) </p>
+     * <p> Description: Inserts a new post into postDB. The Create part of CRUD.
+     * Caller should validate fields via Post.validateTitle/validateBody first.
+     * Works for both top-level posts (parentPostId = -1) and replies. </p>
+     *
+     * @param post A fully built Post object. The id field is ignored (DB auto-assigns).
+     * @throws SQLException if the insert fails
+     */
+    public void createPost(Post post) throws SQLException {
+        String insertPost = "INSERT INTO postDB "
+                + "(title, body, authorUsername, timestamp, postType, thread, parentPostId, "
+                + "isResolved, isDeleted, isInstructorEndorsed, staffComment) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(insertPost)) {
+            pstmt.setString(1, post.getTitle());
+            pstmt.setString(2, post.getBody());
+            pstmt.setString(3, post.getAuthorUsername());
+            pstmt.setString(4, post.getTimestamp());
+            pstmt.setString(5, post.getPostType());
+            pstmt.setString(6, post.getThread());
+            pstmt.setInt(7, post.getParentPostId());
+            pstmt.setBoolean(8, post.isResolved());
+            pstmt.setBoolean(9, post.isDeleted());
+            pstmt.setBoolean(10, post.isInstructorEndorsed());
+            pstmt.setString(11, post.getStaffComment());
+            pstmt.executeUpdate();
+        }
+    }
+
+
+    /*******
+     * <p> Method: getAllPosts() </p>
+     * <p> Description: Returns all non-deleted top-level posts (parentPostId = -1),
+     * newest first. Soft-deleted posts are filtered out of the main list.
+     * Replies are fetched separately via getRepliesForPost(). </p>
+     *
+     * @return ArrayList of top-level Post objects, never null
+     */
+    public ArrayList<Post> getAllPosts() {
+        ArrayList<Post> list = new ArrayList<>();
+        // Exclude soft-deleted posts and replies from the main list view
+        String query = "SELECT * FROM postDB WHERE parentPostId = -1 "
+                + "AND isDeleted = FALSE ORDER BY id DESC";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) list.add(postFromResultSet(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
+    /*******
+     * <p> Method: getPostsByAuthor(String) </p>
+     * <p> Description: Returns all non-deleted top-level posts by a specific author,
+     * newest first. Powers the "My Posts" view per the user story: "I can see a list
+     * of my posts, the number of replies, and how many I have not yet read." </p>
+     *
+     * @param username The author's username to filter by
+     * @return ArrayList of the author's top-level posts, never null
+     */
+    public ArrayList<Post> getPostsByAuthor(String username) {
+        ArrayList<Post> list = new ArrayList<>();
+        String query = "SELECT * FROM postDB WHERE authorUsername = ? "
+                + "AND parentPostId = -1 AND isDeleted = FALSE ORDER BY id DESC";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) list.add(postFromResultSet(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
+    /*******
+     * <p> Method: getRepliesForPost(int) </p>
+     * <p> Description: Returns all replies for a given post, oldest first so the
+     * conversation reads in order. Includes soft-deleted replies so the thread
+     * stays intact (deletion notice shown by the View). </p>
+     *
+     * @param parentPostId The ID of the post whose replies we want
+     * @return ArrayList of reply Posts, oldest first, never null
+     */
+    public ArrayList<Post> getRepliesForPost(int parentPostId) {
+        ArrayList<Post> replies = new ArrayList<>();
+        String query = "SELECT * FROM postDB WHERE parentPostId = ? ORDER BY id ASC";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, parentPostId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) replies.add(postFromResultSet(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return replies;
+    }
+
+
+    /*******
+     * <p> Method: getPostById(int) </p>
+     * <p> Description: Fetches a single post by its primary key. Used by the Controller
+     * before editing, deleting, or resolving to verify the post exists and check ownership.
+     * Returns null if not found. </p>
+     *
+     * @param id The primary key of the post
+     * @return The Post if found, or null
+     */
+    public Post getPostById(int id) {
+        String query = "SELECT * FROM postDB WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return postFromResultSet(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    /*******
+     * <p> Method: updatePost(int, String, String) </p>
+     * <p> Description: Updates the title and body of an existing post. The Update part
+     * of CRUD. Controller checks ownership before calling this. Only title and body
+     * are editable — author, timestamp, and type are immutable after posting. </p>
+     *
+     * @param id       The ID of the post to update
+     * @param newTitle The new title (already validated by the Controller)
+     * @param newBody  The new body (already validated by the Controller)
+     */
+    public void updatePost(int id, String newTitle, String newBody) {
+        String query = "UPDATE postDB SET title = ?, body = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, newTitle);
+            pstmt.setString(2, newBody);
+            pstmt.setInt(3, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /*******
+     * <p> Method: softDeletePost(int) </p>
+     * <p> Description: Soft-deletes a post by setting isDeleted = TRUE. Replies are NOT
+     * removed — they stay in the DB per the user story: "any replies to that post are
+     * not deleted, but anyone viewing the reply will see a message saying the original
+     * post has been deleted." The post disappears from getAllPosts() but its replies
+     * remain. </p>
+     *
+     * @param id The ID of the post to soft-delete
+     */
+    public void softDeletePost(int id) {
+        // Soft delete — mark as deleted but keep the record so replies stay visible
+        String query = "UPDATE postDB SET isDeleted = TRUE WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /*******
+     * <p> Method: markPostResolved(int, boolean) </p>
+     * <p> Description: Toggles the isResolved flag on a QUESTION post. The Controller
+     * checks ownership before calling this. </p>
+     *
+     * @param id       The ID of the post to update
+     * @param resolved True to mark resolved, false to reopen
+     */
+    public void markPostResolved(int id, boolean resolved) {
+        String query = "UPDATE postDB SET isResolved = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setBoolean(1, resolved);
+            pstmt.setInt(2, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /*******
+     * <p> Method: searchPosts(String) </p>
+     * <p> Description: Returns non-deleted top-level posts where title or body contains
+     * the keyword (case-insensitive). Uses LOWER() on both sides since H2 LIKE is
+     * case-sensitive by default. </p>
+     *
+     * @param keyword The search term
+     * @return ArrayList of matching Posts, newest first, never null
+     */
+    public ArrayList<Post> searchPosts(String keyword) {
+        ArrayList<Post> results = new ArrayList<>();
+        // LOWER() on both sides for case-insensitive match in H2
+        String query = "SELECT * FROM postDB WHERE parentPostId = -1 AND isDeleted = FALSE "
+                + "AND (LOWER(title) LIKE LOWER(?) OR LOWER(body) LIKE LOWER(?)) "
+                + "ORDER BY id DESC";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            String pattern = "%" + keyword + "%";
+            pstmt.setString(1, pattern);
+            pstmt.setString(2, pattern);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) results.add(postFromResultSet(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return results;
+    }
+
+
+    /*******
+     * <p> Method: markAsRead(int, String) </p>
+     * <p> Description: Records that a specific user has read a specific post. Uses a
+     * MERGE (H2's upsert) so calling it multiple times is safe — no duplicate rows. </p>
+     *
+     * @param postId   The ID of the post that was read
+     * @param username The username of the student who read it
+     */
+    public void markAsRead(int postId, String username) {
+        // MERGE is H2's upsert — inserts the row if it doesn't exist, ignores if it does
+        String query = "MERGE INTO readStatusDB (username, postId) VALUES (?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            pstmt.setInt(2, postId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /*******
+     * <p> Method: isPostRead(int, String) </p>
+     * <p> Description: Returns true if the given user has read the given post.
+     * Used by buildDisplayString() in the Model to show the "NEW" badge. </p>
+     *
+     * @param postId   The post ID to check
+     * @param username The username to check for
+     * @return True if the user has read this post, false if unread
+     */
+    public boolean isPostRead(int postId, String username) {
+        String query = "SELECT COUNT(*) FROM readStatusDB WHERE postId = ? AND username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, postId);
+            pstmt.setString(2, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    /*******
+     * <p> Method: getReplyCount(int) </p>
+     * <p> Description: Returns the total number of replies for a given post.
+     * Shown in the list view so students can see at a glance how active a thread is. </p>
+     *
+     * @param postId The parent post ID
+     * @return Total reply count, or 0 if none
+     */
+    public int getReplyCount(int postId) {
+        String query = "SELECT COUNT(*) FROM postDB WHERE parentPostId = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, postId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
+    /*******
+     * <p> Method: getUnreadReplyCount(int, String) </p>
+     * <p> Description: Returns how many replies to a post the given user hasn't read yet.
+     * Used to show "(2 new)" in the list view so students know which threads have new
+     * activity since they last checked. </p>
+     *
+     * @param postId   The parent post ID
+     * @param username The username to check unread status for
+     * @return Number of unread replies, or 0 if all read
+     */
+    public int getUnreadReplyCount(int postId, String username) {
+        // Count replies that have no corresponding read entry for this user
+        String query = "SELECT COUNT(*) FROM postDB WHERE parentPostId = ? "
+                + "AND id NOT IN (SELECT postId FROM readStatusDB WHERE username = ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, postId);
+            pstmt.setString(2, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
+    /*******
+     * <p> Method: getPostCountForUser(String) </p>
+     * <p> Description: Returns total post count for a user. Not used in the TP2 student
+     * UI but included for TP3 Staff Epics where instructors need participation metrics. </p>
+     *
+     * @param username The username to count posts for
+     * @return Total post count, or 0
+     */
+    public int getPostCountForUser(String username) {
+        String query = "SELECT COUNT(*) FROM postDB WHERE authorUsername = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
+    /*******
+     * <p> Method: postFromResultSet(ResultSet) </p>
+     * <p> Description: Private helper that constructs a Post object from the current
+     * row of a ResultSet. Centralizes the column-to-field mapping so we don't repeat
+     * the same 12 rs.getString() calls in every query method. </p>
+     *
+     * @param rs A ResultSet positioned on the row to read
+     * @return A fully constructed Post object
+     * @throws SQLException if any column read fails
+     */
+    private Post postFromResultSet(ResultSet rs) throws SQLException {
+        return new Post(
+            rs.getInt("id"),
+            rs.getString("title"),
+            rs.getString("body"),
+            rs.getString("authorUsername"),
+            rs.getString("timestamp"),
+            rs.getString("postType"),
+            rs.getString("thread"),
+            rs.getInt("parentPostId"),
+            rs.getBoolean("isResolved"),
+            rs.getBoolean("isDeleted"),
+            rs.getBoolean("isInstructorEndorsed"),
+            rs.getString("staffComment")
+        );
+    }
+    
+    /*******
+     * <p> Method: dropAllPostTables() </p>
+     * <p> Description: Drops the postDB and readStatusDB tables so the test suite
+     * can start from a completely clean state on every run. Only used by the test class —
+     * never call this in production code. </p>
+     *
+     * @throws SQLException if the drop fails
+     */
+    public void dropAllPostTables() throws SQLException {
+        // Drop tables so the test suite always starts from a clean slate
+        statement.execute("DROP TABLE IF EXISTS postDB");
+        statement.execute("DROP TABLE IF EXISTS readStatusDB");
+    }
 }
