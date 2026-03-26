@@ -321,7 +321,7 @@ public class ViewStudentPosts {
             button_Delete.setDisable(false);
         }
 
-        // Populate replies — show a note on replies if the parent was deleted
+        // Populate replies - show a note on replies if the parent was deleted
         ObservableList<String> replyItems = FXCollections.observableArrayList();
         for (Post r : replies)
             replyItems.add(r.getAuthorUsername() + " (" + r.getTimestamp() + "): " + r.getBody());

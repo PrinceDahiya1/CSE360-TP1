@@ -31,7 +31,7 @@ import entityClasses.Post;
  *   <li>REQ-6: Students can reply to posts</li>
  *   <li>REQ-7: Students can mark their own questions as resolved</li>
  *   <li>REQ-8: Post input validation rejects empty/oversized fields</li>
- *   <li>REQ-9: Ownership is enforced — students can't edit/delete others' posts</li>
+ *   <li>REQ-9: Ownership is enforced - students can't edit/delete others' posts</li>
  *   <li>REQ-10: Read/unread tracking works correctly</li>
  *   <li>REQ-11: My Posts filter returns only the logged-in user's posts</li>
  *   <li>REQ-12: Soft delete preserves replies</li>
@@ -67,8 +67,8 @@ public class TestStudentPosts {
      *
      * <p> How to read the output:
      * <ul>
-     *   <li>PASS — the test behaved as expected</li>
-     *   <li>FAIL — something went wrong; the message explains what</li>
+     *   <li>PASS - the test behaved as expected</li>
+     *   <li>FAIL - something went wrong; the message explains what</li>
      * </ul>
      * A run with all PASSes means all TP2 student user story requirements are satisfied.
      * </p>
@@ -77,7 +77,7 @@ public class TestStudentPosts {
      */
     public static void main(String[] args) {
         System.out.println("========================================================");
-        System.out.println("  TP2 STUDENT POSTS — AUTOMATED TEST SUITE");
+        System.out.println("  TP2 STUDENT POSTS - AUTOMATED TEST SUITE");
         System.out.println("========================================================\n");
 
         // Set up the test database
@@ -112,9 +112,9 @@ public class TestStudentPosts {
                 + " out of " + (passed + failed) + " tests");
         System.out.println("========================================================");
         if (failed == 0)
-            System.out.println("  ALL TESTS PASSED — All TP2 requirements satisfied.");
+            System.out.println("  ALL TESTS PASSED - All TP2 requirements satisfied.");
         else
-            System.out.println("  SOME TESTS FAILED — See details above.");
+            System.out.println("  SOME TESTS FAILED - See details above.");
     }
 
 
@@ -127,7 +127,7 @@ public class TestStudentPosts {
     /*******
      * <p> Method: testPostValidation() </p>
      * <p> Description: Tests all static validation methods on Post.java.
-     * These run independently of the database — they just check the validation logic.
+     * These run independently of the database - they just check the validation logic.
      * Covers REQ-8: post input validation rejects empty/oversized fields. </p>
      *
      * <p> How to interpret output: each line should print PASS. A FAIL means the
@@ -305,7 +305,7 @@ public class TestStudentPosts {
     private static void testSearchPosts() {
         System.out.println("--- Suite 4: Search Posts (REQ-3) ---");
 
-        // Search for keyword in title — both alice's title AND bob's body contain
+        // Search for keyword in title - both alice's title AND bob's body contain
         // "ArrayList" so we check at least 1 result includes alice's post
         ArrayList<Post> results = db.searchPosts("ArrayList");
         boolean aliceFound = results.stream()
@@ -313,19 +313,19 @@ public class TestStudentPosts {
         check("4.1 Search finds post by keyword in title",
                 !results.isEmpty() && aliceFound);
 
-        // Search for keyword in body — only bob's post contains "initialize"
+        // Search for keyword in body - only bob's post contains "initialize"
         results = db.searchPosts("initialize");
         check("4.2 Search finds post by keyword in body",
                 results.size() == 1 && results.get(0).getAuthorUsername().equals("bob"));
 
-        // Case-insensitive — "arraylist" (lowercase) should find same results as "ArrayList"
+        // Case-insensitive - "arraylist" (lowercase) should find same results as "ArrayList"
         results = db.searchPosts("arraylist");
         boolean aliceFoundLower = results.stream()
                 .anyMatch(p -> p.getAuthorUsername().equals("alice"));
         check("4.3 Search is case-insensitive",
                 !results.isEmpty() && aliceFoundLower);
 
-        // Case-insensitive — uppercase should also work
+        // Case-insensitive - uppercase should also work
         results = db.searchPosts("ARRAYLIST");
         boolean aliceFoundUpper = results.stream()
                 .anyMatch(p -> p.getAuthorUsername().equals("alice"));
@@ -389,7 +389,7 @@ public class TestStudentPosts {
 
 
     // =========================================================================
-    // TEST SUITE 6: Delete Post — Soft Delete (REQ-5, REQ-12)
+    // TEST SUITE 6: Delete Post - Soft Delete (REQ-5, REQ-12)
     // =========================================================================
  
     /*******
@@ -437,7 +437,7 @@ public class TestStudentPosts {
                     deletedPost != null);
  
             // 6.3: isDeleted flag is TRUE - View uses this to show [DELETED] tag in list
-            check("6.3 isDeleted flag is TRUE — View shows [DELETED] tag in list",
+            check("6.3 isDeleted flag is TRUE - View shows [DELETED] tag in list",
                     deletedPost != null && deletedPost.isDeleted());
  
             // 6.4: Post appears in getAllPosts() so View can render the deletion notice
@@ -621,12 +621,12 @@ public class TestStudentPosts {
             check("9.2 Post is marked as read after markAsRead()",
                     db.isPostRead(alicesPost.getId(), "newuser"));
 
-            // Calling markAsRead again is safe (MERGE — no duplicate rows)
+            // Calling markAsRead again is safe (MERGE - no duplicate rows)
             db.markAsRead(alicesPost.getId(), "newuser");
             check("9.3 Calling markAsRead() twice is safe (no error)",
                     db.isPostRead(alicesPost.getId(), "newuser"));
 
-            // Unread reply count — newuser hasn't read the replies
+            // Unread reply count - newuser hasn't read the replies
             int unread = db.getUnreadReplyCount(alicesPost.getId(), "newuser");
             check("9.4 Unread reply count correct for user who hasn't read replies",
                     unread == 2); // 2 replies from Suite 7
@@ -723,7 +723,7 @@ public class TestStudentPosts {
 
             // Cannot edit a soft-deleted post
             ArrayList<Post> allIncDeleted = new ArrayList<>();
-            // bob's post was soft deleted — verify the guard
+            // bob's post was soft deleted - verify the guard
             Post bobsDeleted = db.getPostById(
                 db.getAllPosts().isEmpty() ? -1 :
                 db.getPostsByAuthor("bob").isEmpty() ? -1 :
@@ -774,7 +774,7 @@ public class TestStudentPosts {
      * @param e         The unexpected exception that was thrown
      */
     private static void failWithException(String testName, Exception e) {
-        System.out.println("  FAIL: " + testName + " — Exception: " + e.getMessage());
+        System.out.println("  FAIL: " + testName + " - Exception: " + e.getMessage());
         failed++;
     }
 }
