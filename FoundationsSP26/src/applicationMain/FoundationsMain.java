@@ -86,6 +86,8 @@ public class FoundationsMain extends Application {
 		try {
 			// Connect to the database
 			database.connectToDatabase();
+			// TP3: Inject the active database into the Instructor Controller
+			guiRole2.ControllerRole2Home.setDatabase(database);
 		} catch (SQLException e) {
 			// If the connection request fails, it usually means some other app is using it
 			databaseInUse.setTitle("*** ERROR ***");

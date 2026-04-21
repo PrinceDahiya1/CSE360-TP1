@@ -1,5 +1,12 @@
 package guiRole2;
 
+import database.Database;
+import prototype.RuleOfThreeVerifier;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /*******
  * <p> Title: ControllerRole2Home Class. </p>
@@ -32,6 +39,12 @@ public class ControllerRole2Home {
 	the Model is often just a stub, or will be a singleton instantiated object.
 	
 	 */
+	
+	private static Database db;
+
+    public static void setDatabase(Database database) {
+        db = database;
+    }
 
 	/**
 	 * Default constructor is not used.
@@ -73,4 +86,74 @@ public class ControllerRole2Home {
 	protected static void performQuit() {
 		System.exit(0);
 	}
+	
+	// ==================================================================================
+    // TP3 STAFF GRADING DASHBOARD METHODS
+    // ==================================================================================
+
+    protected static void handleEvaluateStudent(String targetUsername, Label resultLabel) {
+        if (db == null) {
+            resultLabel.setText("System Error: Database not connected.");
+            return;
+        }
+        try {
+            RuleOfThreeVerifier verifier = new RuleOfThreeVerifier(db);
+            boolean passed = verifier.verifyStudentInteraction(targetUsername);
+            
+            if (passed) {
+                resultLabel.setText(targetUsername + ": PASSED (3+ peers)");
+                resultLabel.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+            } else {
+                resultLabel.setText(targetUsername + ": FAILED (< 3 peers)");
+                resultLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+            }
+        } catch (SQLException e) {
+            resultLabel.setText("Error: Could not evaluate student.");
+            resultLabel.setStyle("-fx-text-fill: orange;");
+        }
+    }
+
+    protected static void handleSaveStaffComment(int postId, String comment, Label statusLabel, ListView<String> postListView) {
+        if (db == null || comment == null || comment.trim().isEmpty()) {
+            statusLabel.setText("Invalid comment or DB error.");
+            return;
+        }
+        db.updateStaffComment(postId, comment);
+        statusLabel.setText("Comment saved successfully.");
+        statusLabel.setStyle("-fx-text-fill: green;");
+        refreshPostList(postListView);
+    }
+
+    protected static void handleToggleEndorsement(int postId, boolean isEndorsed, ListView<String> postListView) {
+        if (db == null) return;
+        db.updateInstructorEndorsement(postId, isEndorsed);
+        refreshPostList(postListView);
+    }
+
+    protected static void refreshPostList(ListView<String> postListView) {
+        if (db == null || postListView == null) return;
+        
+        postListView.getItems().clear();
+        String query = "SELECT * FROM postDB ORDER BY id ASC";
+        
+        try (PreparedStatement pstmt = db.getConnection().prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+             
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String author = rs.getString("authorUsername");
+                String body = rs.getString("body");
+                boolean endorsed = rs.getBoolean("isInstructorEndorsed");
+                String staffComment = rs.getString("staffComment");
+                
+                String displayStr = "ID: " + id + " | " + author + ": " + body;
+                if (endorsed) displayStr += "\n[★ INSTRUCTOR ENDORSED]";
+                if (staffComment != null && !staffComment.trim().isEmpty()) displayStr += "\n[Staff Note: " + staffComment + "]";
+                
+                postListView.getItems().add(displayStr);
+            }
+        } catch (SQLException e) {
+            postListView.getItems().add("System Error loading posts.");
+        }
+    }
 }

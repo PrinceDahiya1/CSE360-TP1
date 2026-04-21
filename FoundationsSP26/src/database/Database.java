@@ -1619,4 +1619,58 @@ public class Database {
         statement.execute("DROP TABLE IF EXISTS postDB");
         statement.execute("DROP TABLE IF EXISTS readStatusDB");
     }
+    
+    // ==================================================================================
+    // TP3 GRADING & INSTRUCTOR ADDITIONS
+    // ==================================================================================
+
+    /*******
+     * <p> Method: getConnection() </p>
+     * <p> Description: Exposes the active JDBC connection to special verification
+     * classes (like RuleOfThreeVerifier) so they can execute complex grading queries
+     * without bloating the main Database.java file. </p>
+     *
+     * @return The active database Connection object
+     */
+    public Connection getConnection() {
+        return this.connection;
+    }
+
+    /*******
+     * <p> Method: updateStaffComment(int, String) </p>
+     * <p> Description: Allows Graders and Instructors to append an internal, hidden
+     * comment to a specific student post (Staff Epic 6). </p>
+     *
+     * @param postId  The ID of the post being commented on
+     * @param comment The staff-only text to save
+     */
+    public void updateStaffComment(int postId, String comment) {
+        String query = "UPDATE postDB SET staffComment = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, comment);
+            pstmt.setInt(2, postId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*******
+     * <p> Method: updateInstructorEndorsement(int, boolean) </p>
+     * <p> Description: Allows Instructors to officially endorse a student's reply
+     * to highlight high-quality answers (Staff Epic 3). </p>
+     *
+     * @param postId   The ID of the post being endorsed
+     * @param endorsed True to apply the endorsement badge, false to remove it
+     */
+    public void updateInstructorEndorsement(int postId, boolean endorsed) {
+        String query = "UPDATE postDB SET isInstructorEndorsed = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setBoolean(1, endorsed);
+            pstmt.setInt(2, postId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

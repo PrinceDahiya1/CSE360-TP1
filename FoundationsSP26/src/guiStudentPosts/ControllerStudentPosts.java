@@ -60,7 +60,7 @@ public class ControllerStudentPosts {
     protected static void loadMyPosts() {
         String username = ViewStudentPosts.theUser.getUserName();
         ArrayList<Post> posts = theModel.getMyPosts(username);
-        ViewStudentPosts.clearDetailView(); // filter change — reset detail panel
+        ViewStudentPosts.clearDetailView(); // filter change - reset detail panel
         ViewStudentPosts.populatePostList(posts, username);
 
         if (posts.isEmpty())

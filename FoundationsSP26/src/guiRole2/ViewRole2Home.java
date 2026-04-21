@@ -9,8 +9,10 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import database.Database;
-//import database.Database;
 import entityClasses.User;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ListView;
+import javafx.scene.control.CheckBox;
 
 
 /*******
@@ -65,7 +67,7 @@ public class ViewRole2Home {
 	// logging out.
 	protected static Button button_Logout = new Button("Logout");
 	protected static Button button_Quit = new Button("Quit");
-
+	
 	// This is the end of the GUI objects for the page.
 	
 	// These attributes are used to configure the page and populate it with this user's information
@@ -173,13 +175,22 @@ public class ViewRole2Home {
         
         setupButtonUI(button_Quit, "Dialog", 18, 250, Pos.CENTER, 300, 540);
         button_Quit.setOnAction((_) -> {ControllerRole2Home.performQuit(); });
+        
+        // ==================================================================================
+ 		// TP3 STAFF DASHBOARD LAUNCHER
+ 		// ==================================================================================
+ 		Button btnLaunchDash = new Button("Launch TP3 Staff Dashboard");
+ 		btnLaunchDash.setLayoutX(300); // Safely centered
+ 		btnLaunchDash.setLayoutY(380); // Safely below all Phase 2 template lines
+ 		btnLaunchDash.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+ 		btnLaunchDash.setOnAction(e -> launchDashboardWindow());
 
 		// This is the end of the GUI initialization code
 		
 		// Place all of the widget items into the Root Pane's list of children
         theRootPane.getChildren().addAll(
 			label_PageTitle, label_UserDetails, button_UpdateThisUser, line_Separator1,
-	        line_Separator4, button_Logout, button_Quit);
+	        line_Separator4, button_Logout, button_Quit, btnLaunchDash);
 	}
 	
 	
@@ -228,5 +239,87 @@ public class ViewRole2Home {
 		b.setAlignment(p);
 		b.setLayoutX(x);
 		b.setLayoutY(y);		
+	}
+	
+	/**********
+	 * <p> Method: launchDashboardWindow </p>
+	 * <p> Description: Generates a dedicated, isolated pop-up window for the TP3 Staff features 
+	 * to prevent overlapping with the user details layout. </p>
+	 */
+	private void launchDashboardWindow() {
+		Stage dashStage = new Stage();
+		dashStage.setTitle("Team 9 - TP3 Staff Dashboard");
+		Pane dp = new Pane();
+		
+		Label lblTitle = new Label("Grading & Moderation Dashboard");
+		lblTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+		lblTitle.setLayoutX(20); lblTitle.setLayoutY(20);
+		
+		// --- 1. Rule of 3 Verification ---
+		TextField tfUser = new TextField();
+		tfUser.setPromptText("Target Username");
+		tfUser.setLayoutX(20); tfUser.setLayoutY(60); tfUser.setPrefWidth(150);
+		
+		Label lblEvalResult = new Label("Ready for evaluation.");
+		lblEvalResult.setLayoutX(300); lblEvalResult.setLayoutY(65);
+		
+		Button btnEval = new Button("Verify Rule of 3");
+		btnEval.setLayoutX(180); btnEval.setLayoutY(60);
+		btnEval.setOnAction(e -> ControllerRole2Home.handleEvaluateStudent(tfUser.getText().trim(), lblEvalResult));
+		
+		// --- 2. Posts Viewer ---
+		ListView<String> listPosts = new ListView<>();
+		listPosts.setLayoutX(20); listPosts.setLayoutY(110); listPosts.setPrefSize(560, 240);
+		
+		Button btnRefresh = new Button("Refresh Board");
+		btnRefresh.setLayoutX(20); btnRefresh.setLayoutY(360);
+		btnRefresh.setOnAction(e -> ControllerRole2Home.refreshPostList(listPosts));
+		
+		// --- 3. Moderation Tools ---
+		TextField tfPId = new TextField();
+		tfPId.setPromptText("Post ID");
+		tfPId.setLayoutX(20); tfPId.setLayoutY(410); tfPId.setPrefWidth(70);
+		
+		TextField tfComment = new TextField();
+		tfComment.setPromptText("Internal staff comment...");
+		tfComment.setLayoutX(100); tfComment.setLayoutY(410); tfComment.setPrefWidth(240);
+		
+		Label lblStatus = new Label("");
+		lblStatus.setLayoutX(200); lblStatus.setLayoutY(450);
+		
+		Button btnSave = new Button("Save Note");
+		btnSave.setLayoutX(350); btnSave.setLayoutY(410);
+		btnSave.setOnAction(e -> {
+			try {
+				int pid = Integer.parseInt(tfPId.getText().trim());
+				ControllerRole2Home.handleSaveStaffComment(pid, tfComment.getText().trim(), lblStatus, listPosts);
+			} catch (Exception ex) {
+				lblStatus.setText("Error: Invalid numeric ID.");
+				lblStatus.setStyle("-fx-text-fill: red;");
+			}
+		});
+		
+		CheckBox chkEndorse = new CheckBox("Instructor Endorsed");
+		chkEndorse.setLayoutX(20); chkEndorse.setLayoutY(450);
+		chkEndorse.setOnAction(e -> {
+			try {
+				int pid = Integer.parseInt(tfPId.getText().trim());
+				ControllerRole2Home.handleToggleEndorsement(pid, chkEndorse.isSelected(), listPosts);
+				lblStatus.setText("Endorsement updated.");
+				lblStatus.setStyle("-fx-text-fill: green;");
+			} catch (Exception ex) {
+				lblStatus.setText("Error: Invalid numeric ID.");
+				lblStatus.setStyle("-fx-text-fill: red;");
+				chkEndorse.setSelected(!chkEndorse.isSelected()); // Revert toggle visually
+			}
+		});
+		
+		// Add all elements to the new pop-up Pane
+		dp.getChildren().addAll(lblTitle, tfUser, btnEval, lblEvalResult,
+				listPosts, btnRefresh, tfPId, tfComment, btnSave, chkEndorse, lblStatus);
+		
+		Scene scene = new Scene(dp, 600, 500);
+		dashStage.setScene(scene);
+		dashStage.show();
 	}
 }
