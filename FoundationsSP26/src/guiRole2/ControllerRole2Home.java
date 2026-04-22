@@ -129,6 +129,22 @@ public class ControllerRole2Home {
         db.updateInstructorEndorsement(postId, isEndorsed);
         refreshPostList(postListView);
     }
+    
+    /*******
+     * <p> Method: handleDeletePost </p>
+     * <p> Description: Triggers the DB deletion and refreshes the dashboard UI. </p>
+     */
+    protected static void handleDeletePost(int postId, Label statusLabel, ListView<String> postListView) {
+        if (db == null) {
+            statusLabel.setText("Error: Database not connected.");
+            return;
+        }
+        
+        db.deletePost(postId);
+        statusLabel.setText("Post " + postId + " forcefully deleted.");
+        statusLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+        refreshPostList(postListView);
+    }
 
     protected static void refreshPostList(ListView<String> postListView) {
         if (db == null || postListView == null) return;

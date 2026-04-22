@@ -184,13 +184,18 @@ public class ViewRole2Home {
  		btnLaunchDash.setLayoutY(380); // Safely below all Phase 2 template lines
  		btnLaunchDash.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
  		btnLaunchDash.setOnAction(e -> launchDashboardWindow());
+ 		// Give Staff access to the main discussion board to post Announcements
+		Button btnOpenBoard = new Button("Open Discussion Board");
+		btnOpenBoard.setLayoutX(300); btnOpenBoard.setLayoutY(340);
+		// FIX: Use the exact Phase 2 method from Role 1
+		btnOpenBoard.setOnAction(e -> guiStudentPosts.ViewStudentPosts.displayStudentPosts(theStage, theUser));
 
 		// This is the end of the GUI initialization code
 		
 		// Place all of the widget items into the Root Pane's list of children
         theRootPane.getChildren().addAll(
 			label_PageTitle, label_UserDetails, button_UpdateThisUser, line_Separator1,
-	        line_Separator4, button_Logout, button_Quit, btnLaunchDash);
+	        line_Separator4, button_Logout, button_Quit, btnOpenBoard, btnLaunchDash);
 	}
 	
 	
@@ -314,9 +319,22 @@ public class ViewRole2Home {
 			}
 		});
 		
+		Button btnDelete = new Button("Delete Post");
+		btnDelete.setStyle("-fx-background-color: #ff4c4c; -fx-text-fill: white;");
+		btnDelete.setLayoutX(440); btnDelete.setLayoutY(410);
+		btnDelete.setOnAction(e -> {
+			try {
+				int pid = Integer.parseInt(tfPId.getText().trim());
+				ControllerRole2Home.handleDeletePost(pid, lblStatus, listPosts);
+			} catch (Exception ex) {
+				lblStatus.setText("Error: Invalid numeric ID.");
+				lblStatus.setStyle("-fx-text-fill: red;");
+			}
+		});
+		
 		// Add all elements to the new pop-up Pane
 		dp.getChildren().addAll(lblTitle, tfUser, btnEval, lblEvalResult,
-				listPosts, btnRefresh, tfPId, tfComment, btnSave, chkEndorse, lblStatus);
+				listPosts, btnRefresh, tfPId, tfComment, btnSave, chkEndorse, lblStatus, btnDelete);
 		
 		Scene scene = new Scene(dp, 600, 500);
 		dashStage.setScene(scene);

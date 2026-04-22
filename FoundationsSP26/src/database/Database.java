@@ -1418,6 +1418,20 @@ public class Database {
         }
     }
 
+    /*******
+     * <p> Method: deletePost(int) </p>
+     * <p> Description: Allows Instructors/Graders to forcefully delete inappropriate 
+     * student posts (Staff Epic 6 Moderation Override). </p>
+     */
+    public void deletePost(int postId) {
+        String query = "DELETE FROM postDB WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, postId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     /*******
      * <p> Method: markPostResolved(int, boolean) </p>
