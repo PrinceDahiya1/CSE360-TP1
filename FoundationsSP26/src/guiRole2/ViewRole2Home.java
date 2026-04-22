@@ -166,8 +166,16 @@ public class ViewRole2Home {
 		
 		// GUI Area 2
 		
-			// This is a stub, so this area is empty
-		
+		// ==================================================================================
+  		// TP3 STAFF DASHBOARD & DISCUSSION BOARD BUTTONS
+  		// ==================================================================================
+ 		Button btnOpenBoard = new Button("Open Discussion Board");
+ 		setupButtonUI(btnOpenBoard, "Dialog", 16, 250, Pos.CENTER, 275, 200);
+ 		btnOpenBoard.setOnAction(e -> guiStudentPosts.ViewStudentPosts.displayStudentPosts(theStage, theUser));
+ 		
+  		Button btnLaunchDash = new Button("Staff Dashboard");
+  		setupButtonUI(btnLaunchDash, "Dialog", 16, 250, Pos.CENTER, 275, 260);
+  		btnLaunchDash.setOnAction(e -> launchDashboardWindow());
 		
 		// GUI Area 3
         setupButtonUI(button_Logout, "Dialog", 18, 250, Pos.CENTER, 20, 540);
@@ -175,20 +183,6 @@ public class ViewRole2Home {
         
         setupButtonUI(button_Quit, "Dialog", 18, 250, Pos.CENTER, 300, 540);
         button_Quit.setOnAction((_) -> {ControllerRole2Home.performQuit(); });
-        
-        // ==================================================================================
- 		// TP3 STAFF DASHBOARD LAUNCHER
- 		// ==================================================================================
- 		Button btnLaunchDash = new Button("Launch TP3 Staff Dashboard");
- 		btnLaunchDash.setLayoutX(300); // Safely centered
- 		btnLaunchDash.setLayoutY(380); // Safely below all Phase 2 template lines
- 		btnLaunchDash.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
- 		btnLaunchDash.setOnAction(e -> launchDashboardWindow());
- 		// Give Staff access to the main discussion board to post Announcements
-		Button btnOpenBoard = new Button("Open Discussion Board");
-		btnOpenBoard.setLayoutX(300); btnOpenBoard.setLayoutY(340);
-		// FIX: Use the exact Phase 2 method from Role 1
-		btnOpenBoard.setOnAction(e -> guiStudentPosts.ViewStudentPosts.displayStudentPosts(theStage, theUser));
 
 		// This is the end of the GUI initialization code
 		
@@ -248,12 +242,10 @@ public class ViewRole2Home {
 	
 	/**********
 	 * <p> Method: launchDashboardWindow </p>
-	 * <p> Description: Generates a dedicated, isolated pop-up window for the TP3 Staff features 
-	 * to prevent overlapping with the user details layout. </p>
+	 * <p> Description: Generates a dedicated Pane for the TP3 Staff features 
+	 * and swaps it into the main application window. </p>
 	 */
 	private void launchDashboardWindow() {
-		Stage dashStage = new Stage();
-		dashStage.setTitle("Team 9 - TP3 Staff Dashboard");
 		Pane dp = new Pane();
 		
 		Label lblTitle = new Label("Grading & Moderation Dashboard");
@@ -274,26 +266,26 @@ public class ViewRole2Home {
 		
 		// --- 2. Posts Viewer ---
 		ListView<String> listPosts = new ListView<>();
-		listPosts.setLayoutX(20); listPosts.setLayoutY(110); listPosts.setPrefSize(560, 240);
+		listPosts.setLayoutX(20); listPosts.setLayoutY(110); listPosts.setPrefSize(760, 270);
 		
 		Button btnRefresh = new Button("Refresh Board");
-		btnRefresh.setLayoutX(20); btnRefresh.setLayoutY(360);
+		btnRefresh.setLayoutX(20); btnRefresh.setLayoutY(390);
 		btnRefresh.setOnAction(e -> ControllerRole2Home.refreshPostList(listPosts));
 		
 		// --- 3. Moderation Tools ---
 		TextField tfPId = new TextField();
 		tfPId.setPromptText("Post ID");
-		tfPId.setLayoutX(20); tfPId.setLayoutY(410); tfPId.setPrefWidth(70);
+		tfPId.setLayoutX(20); tfPId.setLayoutY(440); tfPId.setPrefWidth(70);
 		
 		TextField tfComment = new TextField();
 		tfComment.setPromptText("Internal staff comment...");
-		tfComment.setLayoutX(100); tfComment.setLayoutY(410); tfComment.setPrefWidth(240);
+		tfComment.setLayoutX(100); tfComment.setLayoutY(440); tfComment.setPrefWidth(240);
 		
 		Label lblStatus = new Label("");
-		lblStatus.setLayoutX(200); lblStatus.setLayoutY(450);
+		lblStatus.setLayoutX(200); lblStatus.setLayoutY(480);
 		
 		Button btnSave = new Button("Save Note");
-		btnSave.setLayoutX(350); btnSave.setLayoutY(410);
+		btnSave.setLayoutX(350); btnSave.setLayoutY(440);
 		btnSave.setOnAction(e -> {
 			try {
 				int pid = Integer.parseInt(tfPId.getText().trim());
@@ -305,7 +297,7 @@ public class ViewRole2Home {
 		});
 		
 		CheckBox chkEndorse = new CheckBox("Instructor Endorsed");
-		chkEndorse.setLayoutX(20); chkEndorse.setLayoutY(450);
+		chkEndorse.setLayoutX(20); chkEndorse.setLayoutY(480);
 		chkEndorse.setOnAction(e -> {
 			try {
 				int pid = Integer.parseInt(tfPId.getText().trim());
@@ -321,7 +313,7 @@ public class ViewRole2Home {
 		
 		Button btnDelete = new Button("Delete Post");
 		btnDelete.setStyle("-fx-background-color: #ff4c4c; -fx-text-fill: white;");
-		btnDelete.setLayoutX(440); btnDelete.setLayoutY(410);
+		btnDelete.setLayoutX(440); btnDelete.setLayoutY(440);
 		btnDelete.setOnAction(e -> {
 			try {
 				int pid = Integer.parseInt(tfPId.getText().trim());
@@ -332,12 +324,23 @@ public class ViewRole2Home {
 			}
 		});
 		
-		// Add all elements to the new pop-up Pane
-		dp.getChildren().addAll(lblTitle, tfUser, btnEval, lblEvalResult,
-				listPosts, btnRefresh, tfPId, tfComment, btnSave, chkEndorse, lblStatus, btnDelete);
+		// --- 4. Return to Home Footer ---
+		Line line_Sep = new Line(20, 525, width-20, 525);
+		Button btnBack = new Button("Return to Home");
+		setupButtonUI(btnBack, "Dialog", 14, 150, Pos.CENTER, 20, 540);
+		btnBack.setOnAction(e -> {
+			// Restore the original Role 2 Home scene
+			theStage.setTitle("CSE 360 Foundations: Role2 Home Page");
+			theStage.setScene(theRole2HomeScene);
+		});
 		
-		Scene scene = new Scene(dp, 600, 500);
-		dashStage.setScene(scene);
-		dashStage.show();
+		// Add all elements to the Pane
+		dp.getChildren().addAll(lblTitle, tfUser, btnEval, lblEvalResult,
+				listPosts, btnRefresh, tfPId, tfComment, btnSave, chkEndorse, lblStatus, btnDelete, line_Sep, btnBack);
+		
+		// Create the new scene and set it on the main stage
+		Scene dashScene = new Scene(dp, width, height);
+		theStage.setTitle("Team 9 - Staff Dashboard");
+		theStage.setScene(dashScene);
 	}
 }

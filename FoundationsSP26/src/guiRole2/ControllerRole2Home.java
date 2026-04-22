@@ -91,7 +91,7 @@ public class ControllerRole2Home {
     // TP3 STAFF GRADING DASHBOARD METHODS
     // ==================================================================================
 
-    protected static void handleEvaluateStudent(String targetUsername, Label resultLabel) {
+	public static void handleEvaluateStudent(String targetUsername, Label resultLabel) {
         if (db == null) {
             resultLabel.setText("System Error: Database not connected.");
             return;
@@ -113,7 +113,7 @@ public class ControllerRole2Home {
         }
     }
 
-    protected static void handleSaveStaffComment(int postId, String comment, Label statusLabel, ListView<String> postListView) {
+	public static void handleSaveStaffComment(int postId, String comment, Label statusLabel, ListView<String> postListView) {
         if (db == null || comment == null || comment.trim().isEmpty()) {
             statusLabel.setText("Invalid comment or DB error.");
             return;
@@ -124,7 +124,7 @@ public class ControllerRole2Home {
         refreshPostList(postListView);
     }
 
-    protected static void handleToggleEndorsement(int postId, boolean isEndorsed, ListView<String> postListView) {
+    public static void handleToggleEndorsement(int postId, boolean isEndorsed, ListView<String> postListView) {
         if (db == null) return;
         db.updateInstructorEndorsement(postId, isEndorsed);
         refreshPostList(postListView);
@@ -134,7 +134,7 @@ public class ControllerRole2Home {
      * <p> Method: handleDeletePost </p>
      * <p> Description: Triggers the DB deletion and refreshes the dashboard UI. </p>
      */
-    protected static void handleDeletePost(int postId, Label statusLabel, ListView<String> postListView) {
+    public static void handleDeletePost(int postId, Label statusLabel, ListView<String> postListView) {
         if (db == null) {
             statusLabel.setText("Error: Database not connected.");
             return;
@@ -146,7 +146,7 @@ public class ControllerRole2Home {
         refreshPostList(postListView);
     }
 
-    protected static void refreshPostList(ListView<String> postListView) {
+    public static void refreshPostList(ListView<String> postListView) {
         if (db == null || postListView == null) return;
         
         postListView.getItems().clear();

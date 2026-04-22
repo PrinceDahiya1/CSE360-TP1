@@ -19,6 +19,8 @@ import javafx.stage.Stage;
 import database.Database;
 import entityClasses.User;
 import guiUserUpdate.ViewUserUpdate;
+import javafx.scene.control.ListView;
+import javafx.scene.control.CheckBox;
 
 /*******
  * <p> Title: GUIAdminHomePage Class. </p>
@@ -266,6 +268,15 @@ public class ViewAdminHome {
 		setupButtonUI(button_AddRemoveRoles, "Dialog", 16, 250, Pos.CENTER, 20, 470);
 		button_AddRemoveRoles.setOnAction((_) -> {ControllerAdminHome.addRemoveRoles(); });
 		
+		// --- TP3 Admin Access ---
+		Button btnOpenBoard = new Button("Open Discussion Board");
+		setupButtonUI(btnOpenBoard, "Dialog", 16, 250, Pos.CENTER, 300, 270);
+		btnOpenBoard.setOnAction(e -> guiStudentPosts.ViewStudentPosts.displayStudentPosts(theStage, theUser));
+
+		Button btnLaunchDash = new Button("Staff Dashboard");
+		setupButtonUI(btnLaunchDash, "Dialog", 16, 250, Pos.CENTER, 300, 320);
+		btnLaunchDash.setOnAction(e -> launchDashboardWindow());
+		
 		// GUI Area 5
 		setupButtonUI(button_Logout, "Dialog", 18, 250, Pos.CENTER, 20, 540);
 		button_Logout.setOnAction((_) -> {ControllerAdminHome.performLogout(); });
@@ -288,6 +299,8 @@ public class ViewAdminHome {
     		button_DeleteUser,
     		button_ListUsers,
     		button_AddRemoveRoles,
+    		btnOpenBoard,
+    		btnLaunchDash,
     		line_Separator4, 
     		button_Logout,
     		button_Quit
@@ -381,5 +394,109 @@ public class ViewAdminHome {
 		c.setMinWidth(w);
 		c.setLayoutX(x);
 		c.setLayoutY(y);
+	}
+	
+	/**********
+	 * <p> Method: launchDashboardWindow </p>
+	 * <p> Description: Generates a dedicated Pane for the TP3 Staff features 
+	 * allowing the Admin to override and moderate the board. </p>
+	 */
+	private void launchDashboardWindow() {
+		Pane dp = new Pane();
+		
+		Label lblTitle = new Label("Grading & Moderation Dashboard (Admin Override)");
+		lblTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+		lblTitle.setLayoutX(20); lblTitle.setLayoutY(20);
+		
+		// --- 1. Rule of 3 Verification ---
+		TextField tfUser = new TextField();
+		tfUser.setPromptText("Target Username");
+		tfUser.setLayoutX(20); tfUser.setLayoutY(60); tfUser.setPrefWidth(150);
+		
+		Label lblEvalResult = new Label("Ready for evaluation.");
+		lblEvalResult.setLayoutX(300); lblEvalResult.setLayoutY(65);
+		
+		Button btnEval = new Button("Verify Rule of 3");
+		btnEval.setLayoutX(180); btnEval.setLayoutY(60);
+		btnEval.setOnAction(e -> guiRole2.ControllerRole2Home.handleEvaluateStudent(tfUser.getText().trim(), lblEvalResult));
+		
+		// --- 2. Posts Viewer ---
+		ListView<String> listPosts = new ListView<>();
+		listPosts.setLayoutX(20); listPosts.setLayoutY(110); listPosts.setPrefSize(760, 270);
+		
+		Button btnRefresh = new Button("Refresh Board");
+		btnRefresh.setLayoutX(20); btnRefresh.setLayoutY(390);
+		btnRefresh.setOnAction(e -> guiRole2.ControllerRole2Home.refreshPostList(listPosts));
+		
+		// --- 3. Moderation Tools ---
+		TextField tfPId = new TextField();
+		tfPId.setPromptText("Post ID");
+		tfPId.setLayoutX(20); tfPId.setLayoutY(440); tfPId.setPrefWidth(70);
+		
+		TextField tfComment = new TextField();
+		tfComment.setPromptText("Internal staff comment...");
+		tfComment.setLayoutX(100); tfComment.setLayoutY(440); tfComment.setPrefWidth(240);
+		
+		Label lblStatus = new Label("");
+		lblStatus.setLayoutX(200); lblStatus.setLayoutY(480);
+		
+		Button btnSave = new Button("Save Note");
+		btnSave.setLayoutX(350); btnSave.setLayoutY(440);
+		btnSave.setOnAction(e -> {
+			try {
+				int pid = Integer.parseInt(tfPId.getText().trim());
+				guiRole2.ControllerRole2Home.handleSaveStaffComment(pid, tfComment.getText().trim(), lblStatus, listPosts);
+			} catch (Exception ex) {
+				lblStatus.setText("Error: Invalid numeric ID.");
+				lblStatus.setStyle("-fx-text-fill: red;");
+			}
+		});
+		
+		CheckBox chkEndorse = new CheckBox("Instructor Endorsed");
+		chkEndorse.setLayoutX(20); chkEndorse.setLayoutY(480);
+		chkEndorse.setOnAction(e -> {
+			try {
+				int pid = Integer.parseInt(tfPId.getText().trim());
+				guiRole2.ControllerRole2Home.handleToggleEndorsement(pid, chkEndorse.isSelected(), listPosts);
+				lblStatus.setText("Endorsement updated.");
+				lblStatus.setStyle("-fx-text-fill: green;");
+			} catch (Exception ex) {
+				lblStatus.setText("Error: Invalid numeric ID.");
+				lblStatus.setStyle("-fx-text-fill: red;");
+				chkEndorse.setSelected(!chkEndorse.isSelected()); // Revert toggle visually
+			}
+		});
+		
+		Button btnDelete = new Button("Delete Post");
+		btnDelete.setStyle("-fx-background-color: #ff4c4c; -fx-text-fill: white;");
+		btnDelete.setLayoutX(440); btnDelete.setLayoutY(440);
+		btnDelete.setOnAction(e -> {
+			try {
+				int pid = Integer.parseInt(tfPId.getText().trim());
+				guiRole2.ControllerRole2Home.handleDeletePost(pid, lblStatus, listPosts);
+			} catch (Exception ex) {
+				lblStatus.setText("Error: Invalid numeric ID.");
+				lblStatus.setStyle("-fx-text-fill: red;");
+			}
+		});
+		
+		// --- 4. Return to Home Footer ---
+		Line line_Sep = new Line(20, 525, width-20, 525);
+		Button btnBack = new Button("Return to Home");
+		setupButtonUI(btnBack, "Dialog", 14, 150, Pos.CENTER, 20, 540);
+		btnBack.setOnAction(e -> {
+			// Restore the original Admin Home scene
+			theStage.setTitle("CSE 360 Foundation Code: Admin Home Page");
+			theStage.setScene(theAdminHomeScene);
+		});
+		
+		// Add all elements to the Pane
+		dp.getChildren().addAll(lblTitle, tfUser, btnEval, lblEvalResult,
+				listPosts, btnRefresh, tfPId, tfComment, btnSave, chkEndorse, lblStatus, btnDelete, line_Sep, btnBack);
+		
+		// Create the new scene and set it on the main stage
+		Scene dashScene = new Scene(dp, width, height);
+		theStage.setTitle("Team 9 - Admin Moderation Dashboard");
+		theStage.setScene(dashScene);
 	}
 }

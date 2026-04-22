@@ -336,9 +336,21 @@ public class ControllerStudentPosts {
                 ViewStudentPosts.theStage, ViewStudentPosts.theUser);
     }
     
+    /*******
+     * <p> Method: performHome() </p>
+     * <p> Description: Routes the user back to their correct home dashboard 
+     * based on their highest role. </p>
+     */
     protected static void performHome() {
-        // TODO: Will wire this up to route back to Role1, Role2, or Admin home later
-        System.out.println("Home button clicked!"); 
+        if (ViewStudentPosts.theUser != null) {
+            if (ViewStudentPosts.theUser.getAdminRole()) {
+                guiAdminHome.ViewAdminHome.displayAdminHome(ViewStudentPosts.theStage, ViewStudentPosts.theUser);
+            } else if (ViewStudentPosts.theUser.getNewRole2()) {
+                guiRole2.ViewRole2Home.displayRole2Home(ViewStudentPosts.theStage, ViewStudentPosts.theUser);
+            } else {
+                guiRole1.ViewRole1Home.displayRole1Home(ViewStudentPosts.theStage, ViewStudentPosts.theUser);
+            }
+        }
     }
 
     /*******
