@@ -335,6 +335,11 @@ public class ControllerStudentPosts {
         guiUserUpdate.ViewUserUpdate.displayUserUpdate(
                 ViewStudentPosts.theStage, ViewStudentPosts.theUser);
     }
+    
+    protected static void performHome() {
+        // TODO: Will wire this up to route back to Role1, Role2, or Admin home later
+        System.out.println("Home button clicked!"); 
+    }
 
     /*******
      * <p> Method: performLogout() </p>

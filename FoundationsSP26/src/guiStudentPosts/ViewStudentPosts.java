@@ -97,18 +97,20 @@ public class ViewStudentPosts {
     protected static Line line_Sep4 = new Line(20, 558, width - 20, 558);
 
     // --- Area 5: Footer ---
+    protected static Button button_Home   = new Button("Home");
     protected static Button button_Logout = new Button("Logout");
     protected static Button button_Quit   = new Button("Quit");
 
     // --- Singleton + shared state ---
-    private static ViewStudentPosts theView;
-    private static Scene            theScene;
+    private static ViewStudentPosts 	theView;
+    private static Scene            	theScene;
     protected static Stage              theStage;
     protected static Pane               theRootPane;
     protected static entityClasses.User theUser;
     protected static Post               selectedPost   = null;
     protected static ArrayList<Post>    displayedPosts = new ArrayList<>();
     protected static boolean            editMode          = false;
+    protected static boolean 			isStaffOrAdmin = false; // Tracks if Role2/Admin is viewing
     // Guard flag: true while setItems() is running so the listener does not fire mid-swap
     protected static boolean            suppressSelection = false;
 
@@ -126,7 +128,30 @@ public class ViewStudentPosts {
         theUser  = user;
         if (theView == null) theView = new ViewStudentPosts();
 
-        label_UserDetails.setText("Student: " + theUser.getUserName());
+        // --- ROLE CHECK ---
+        String prefix = "Student";
+        isStaffOrAdmin = false;
+        
+        if (theUser != null) {
+            if (theUser.getAdminRole()) { 
+                prefix = "Admin"; 
+                isStaffOrAdmin = true; 
+            } else if (theUser.getNewRole2()) { 
+                prefix = "Staff"; 
+                isStaffOrAdmin = true; 
+            }
+        }
+        
+        label_UserDetails.setText(prefix + ": " + theUser.getUserName());
+        
+        // Add ANNOUNCEMENT and NOTE types if Staff/Admin
+        if (isStaffOrAdmin) {
+            comboBox_PostType.setItems(FXCollections.observableArrayList("QUESTION", "STATEMENT", "ANNOUNCEMENT", "NOTE"));
+        } else {
+            comboBox_PostType.setItems(FXCollections.observableArrayList("QUESTION", "STATEMENT"));
+        }
+        comboBox_PostType.setValue("QUESTION");
+        
         ControllerStudentPosts.loadAllPosts();
         setEditMode(false);
         clearInputFields();
@@ -224,13 +249,26 @@ public class ViewStudentPosts {
         button_Reply.setOnAction((_)         -> ControllerStudentPosts.performReply());
         button_EditPost.setOnAction((_)      -> ControllerStudentPosts.performEditPost());
         button_SaveEdit.setOnAction((_)      -> ControllerStudentPosts.performSaveEdit());
-        button_Delete.setOnAction((_)        -> ControllerStudentPosts.performDelete());
+        //button_Delete.setOnAction((_)        -> ControllerStudentPosts.performDelete());
         button_ToggleResolve.setOnAction((_) -> ControllerStudentPosts.performToggleResolve());
         button_CancelEdit.setOnAction((_)    -> ControllerStudentPosts.performCancelEdit());
+        
+        button_Delete.setOnAction((_) -> {
+            if (selectedPost != null && !selectedPost.getAuthorUsername().equals(theUser.getUserName())) {
+                if (isStaffOrAdmin) {
+                    label_ErrorMsg.setText("You can only delete your own post. To delete another student's post, please use the Staff Dashboard.");
+                    return; // Stop the deletion
+                }
+            }
+            ControllerStudentPosts.performDelete();
+        });
 
         // ---- Area 5: Footer ----
-        setupButtonUI(button_Logout, "Dialog", 13, 140, Pos.CENTER,  20, 563);
-        setupButtonUI(button_Quit,   "Dialog", 13, 140, Pos.CENTER, 170, 563);
+        setupButtonUI(button_Home,   "Dialog", 13, 140, Pos.CENTER,  20, 563);
+        setupButtonUI(button_Logout, "Dialog", 13, 140, Pos.CENTER, 170, 563);
+        setupButtonUI(button_Quit,   "Dialog", 13, 140, Pos.CENTER, 320, 563);
+        
+        button_Home.setOnAction((_)   -> ControllerStudentPosts.performHome());
         button_Logout.setOnAction((_) -> ControllerStudentPosts.performLogout());
         button_Quit.setOnAction((_)   -> ControllerStudentPosts.performQuit());
 
@@ -247,7 +285,7 @@ public class ViewStudentPosts {
             button_NewPost, button_Reply, button_EditPost, button_SaveEdit,
             button_Delete, button_ToggleResolve, button_CancelEdit,
             line_Sep4,
-            button_Logout, button_Quit
+            button_Home, button_Logout, button_Quit
         );
     }
 
