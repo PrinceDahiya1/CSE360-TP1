@@ -408,17 +408,34 @@ public class ViewAdminHome {
 		lblTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 		lblTitle.setLayoutX(20); lblTitle.setLayoutY(20);
 		
-		// --- 1. Rule of 3 Verification ---
+		// --- 0. Statistics Dashboard (Epic 4) ---
+		Label lblStats = new Label();
+		lblStats.setLayoutX(480); 
+		lblStats.setLayoutY(24);
+		guiRole2.ControllerRole2Home.refreshStatistics(lblStats);
+		
+		// --- 1. Rule of 3 Verification & Targeted Search (Epic 5) ---
 		TextField tfUser = new TextField();
 		tfUser.setPromptText("Target Username");
 		tfUser.setLayoutX(20); tfUser.setLayoutY(60); tfUser.setPrefWidth(150);
 		
-		Label lblEvalResult = new Label("Ready for evaluation.");
-		lblEvalResult.setLayoutX(300); lblEvalResult.setLayoutY(65);
+		Label lblEvalResult = new Label("");
+		lblEvalResult.setLayoutX(370); lblEvalResult.setLayoutY(65);
 		
 		Button btnEval = new Button("Verify Rule of 3");
 		btnEval.setLayoutX(180); btnEval.setLayoutY(60);
-		btnEval.setOnAction(e -> guiRole2.ControllerRole2Home.handleEvaluateStudent(tfUser.getText().trim(), lblEvalResult));
+		btnEval.setOnAction(e -> {
+			String target = tfUser.getText().trim();
+			if (target.isEmpty()) {
+				lblEvalResult.setText("Error: Please enter a username.");
+				lblEvalResult.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+			} else {
+				guiRole2.ControllerRole2Home.handleEvaluateStudent(target, lblEvalResult);
+			}
+		});
+
+		Button btnSearch = new Button("Search");
+		btnSearch.setLayoutX(285); btnSearch.setLayoutY(60);
 		
 		// --- 2. Posts Viewer ---
 		ListView<String> listPosts = new ListView<>();
@@ -428,6 +445,14 @@ public class ViewAdminHome {
 		btnRefresh.setLayoutX(20); btnRefresh.setLayoutY(390);
 		btnRefresh.setOnAction(e -> guiRole2.ControllerRole2Home.refreshPostList(listPosts));
 		
+		// --- 6. Unresolved Questions (Epic 8) ---
+				Button btnUnresolved = new Button("Unresolved Questions");
+				btnUnresolved.setLayoutX(130); btnUnresolved.setLayoutY(390);
+				btnUnresolved.setOnAction(e -> guiRole2.ControllerRole2Home.refreshUnresolvedQuestions(listPosts));
+		
+		// --- Search Button ---
+		btnSearch.setOnAction(e -> guiRole2.ControllerRole2Home.refreshPostList(listPosts, tfUser.getText().trim()));
+				
 		// --- 3. Moderation Tools ---
 		TextField tfPId = new TextField();
 		tfPId.setPromptText("Post ID");
@@ -438,7 +463,12 @@ public class ViewAdminHome {
 		tfComment.setLayoutX(100); tfComment.setLayoutY(440); tfComment.setPrefWidth(240);
 		
 		Label lblStatus = new Label("");
-		lblStatus.setLayoutX(200); lblStatus.setLayoutY(480);
+		lblStatus.setLayoutX(400); lblStatus.setLayoutY(485);
+		
+		// --- 4. Export Report (Epic 7) ---
+		Button btnExport = new Button("Export Performance Report (.csv)");
+		btnExport.setLayoutX(170); btnExport.setLayoutY(475);
+		btnExport.setOnAction(e -> guiRole2.ControllerRole2Home.handleGenerateReport(lblStatus, theStage));
 		
 		Button btnSave = new Button("Save Note");
 		btnSave.setLayoutX(350); btnSave.setLayoutY(440);
@@ -469,7 +499,7 @@ public class ViewAdminHome {
 		
 		Button btnDelete = new Button("Delete Post");
 		btnDelete.setStyle("-fx-background-color: #ff4c4c; -fx-text-fill: white;");
-		btnDelete.setLayoutX(440); btnDelete.setLayoutY(440);
+		btnDelete.setLayoutX(430); btnDelete.setLayoutY(440);
 		btnDelete.setOnAction(e -> {
 			try {
 				int pid = Integer.parseInt(tfPId.getText().trim());
@@ -480,7 +510,7 @@ public class ViewAdminHome {
 			}
 		});
 		
-		// --- 4. Return to Home Footer ---
+		// --- 5. Return to Home Footer ---
 		Line line_Sep = new Line(20, 525, width-20, 525);
 		Button btnBack = new Button("Return to Home");
 		setupButtonUI(btnBack, "Dialog", 14, 150, Pos.CENTER, 20, 540);
@@ -491,8 +521,9 @@ public class ViewAdminHome {
 		});
 		
 		// Add all elements to the Pane
-		dp.getChildren().addAll(lblTitle, tfUser, btnEval, lblEvalResult,
-				listPosts, btnRefresh, tfPId, tfComment, btnSave, chkEndorse, lblStatus, btnDelete, line_Sep, btnBack);
+		dp.getChildren().addAll(lblTitle, lblStats, tfUser, btnEval, btnSearch, lblEvalResult,
+				listPosts, btnRefresh, btnUnresolved, tfPId, tfComment, btnSave, chkEndorse, btnExport, 
+				lblStatus, btnDelete, line_Sep, btnBack);
 		
 		// Create the new scene and set it on the main stage
 		Scene dashScene = new Scene(dp, width, height);

@@ -1687,4 +1687,73 @@ public class Database {
             e.printStackTrace();
         }
     }
+    
+    /*******
+     * <p> Method: getContextualThreadedPosts() </p>
+     * <p> Description: Returns all posts ordered so that parent posts are 
+     * immediately followed by their chronological replies (Staff Epic 2). </p>
+     *
+     * @return ArrayList of Post objects in threaded order
+     */
+    public ArrayList<Post> getContextualThreadedPosts() {
+        ArrayList<Post> list = new ArrayList<>();
+        // SQL trick: Group by parent ID (if top-level, use its own ID), then order chronologically
+        String query = "SELECT * FROM postDB ORDER BY CASE WHEN parentPostId = -1 THEN id ELSE parentPostId END ASC, id ASC";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                list.add(postFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
+    /*******
+     * <p> Method: getDiscussionStatistics() </p>
+     * <p> Description: Returns the total count of active Questions and Statements 
+     * to power the Staff Statistics Dashboard (Epic 4). </p>
+     *
+     * @return An integer array where index 0 is Questions and index 1 is Statements.
+     */
+    public int[] getDiscussionStatistics() {
+        int[] stats = new int[]{0, 0};
+        String query = "SELECT postType, COUNT(*) as count FROM postDB WHERE isDeleted = FALSE GROUP BY postType";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String type = rs.getString("postType");
+                int count = rs.getInt("count");
+                if ("QUESTION".equalsIgnoreCase(type)) {
+                    stats[0] = count;
+                } else if ("STATEMENT".equalsIgnoreCase(type)) {
+                    stats[1] = count;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return stats;
+    }
+    
+    /*******
+     * <p> Method: getUnresolvedQuestions() </p>
+     * <p> Description: Returns all active QUESTION posts that have 0 replies (Epic 8). </p>
+     */
+    public ArrayList<Post> getUnresolvedQuestions() {
+        ArrayList<Post> list = new ArrayList<>();
+        // Select questions that are not deleted and whose ID does not appear as a parentPostId in any other post
+        String query = "SELECT * FROM postDB WHERE parentPostId = -1 AND postType = 'QUESTION' AND isDeleted = FALSE "
+                     + "AND id NOT IN (SELECT parentPostId FROM postDB WHERE parentPostId != -1) ORDER BY id DESC";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                list.add(postFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
