@@ -150,15 +150,17 @@ public class ControllerRole2Home {
     
     /*******
      * <p> Method: refreshStatistics </p>
-     * <p> Description: Fetches the Question/Statement counts from the Database
-     * and updates the UI label for the Statistics Dashboard (Epic 4). </p>
+     * <p> Description: Fetches the Question/Statement counts and Peak Activity Time. </p>
      */
     public static void refreshStatistics(Label statsLabel) {
-        if (db == null || statsLabel == null) return;
+        dashboardStatsLabel = statsLabel;
+        if (db == null || dashboardStatsLabel == null) return;
         
         int[] stats = db.getDiscussionStatistics();
-        statsLabel.setText("📊 Board Stats  |  Questions: " + stats[0] + "  |  Statements: " + stats[1]);
-        statsLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+        String peakTime = db.getPeakActivityTime();
+        
+        dashboardStatsLabel.setText("📊 Board Stats | Questions: " + stats[0] + " | Statements: " + stats[1] + " | Peak Activity: " + peakTime);
+        dashboardStatsLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
     }
 
     /*******

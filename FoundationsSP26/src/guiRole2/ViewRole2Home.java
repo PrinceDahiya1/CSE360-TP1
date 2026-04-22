@@ -254,8 +254,8 @@ public class ViewRole2Home {
 		
 		// --- 0. Statistics Dashboard (Epic 4) ---
 		Label lblStats = new Label();
-		lblStats.setLayoutX(480); 
-		lblStats.setLayoutY(24);
+		lblStats.setLayoutX(300); 
+		lblStats.setLayoutY(395);
 		ControllerRole2Home.refreshStatistics(lblStats);
 		
 		// --- 1. Rule of 3 Verification & Targeted Search (Epic 5) ---
@@ -289,15 +289,15 @@ public class ViewRole2Home {
 		btnRefresh.setLayoutX(20); btnRefresh.setLayoutY(390);
 		btnRefresh.setOnAction(e -> ControllerRole2Home.refreshPostList(listPosts));
 		
-		// --- 6. Unresolved Questions (Epic 8) ---
-				Button btnUnresolved = new Button("Unresolved Questions");
-				btnUnresolved.setLayoutX(130); btnUnresolved.setLayoutY(390);
-				btnUnresolved.setOnAction(e -> ControllerRole2Home.refreshUnresolvedQuestions(listPosts));
+		// --- 3. Unresolved Questions (Epic 8) ---
+		Button btnUnresolved = new Button("Unresolved Questions");
+		btnUnresolved.setLayoutX(130); btnUnresolved.setLayoutY(390);
+		btnUnresolved.setOnAction(e -> ControllerRole2Home.refreshUnresolvedQuestions(listPosts));
 		
 		// --- Search Button ---
 		btnSearch.setOnAction(e -> ControllerRole2Home.refreshPostList(listPosts, tfUser.getText().trim()));
 		
-		// --- 3. Moderation Tools ---
+		// --- 4. Moderation Tools ---
 		TextField tfPId = new TextField();
 		tfPId.setPromptText("Post ID");
 		tfPId.setLayoutX(20); tfPId.setLayoutY(440); tfPId.setPrefWidth(70);
@@ -309,7 +309,7 @@ public class ViewRole2Home {
 		Label lblStatus = new Label("");
 		lblStatus.setLayoutX(400); lblStatus.setLayoutY(485);
 		
-		// --- 4. Export Report (Epic 7) ---
+		// --- 5. Export Report (Epic 7) ---
 		Button btnExport = new Button("Export Performance Report (.csv)");
 		btnExport.setLayoutX(170); btnExport.setLayoutY(475);
 		btnExport.setOnAction(e -> ControllerRole2Home.handleGenerateReport(lblStatus, theStage));
@@ -354,7 +354,7 @@ public class ViewRole2Home {
 			}
 		});
 		
-		// --- 5. Return to Home Footer ---
+		// --- 6. Return to Home Footer ---
 		Line line_Sep = new Line(20, 525, width-20, 525);
 		Button btnBack = new Button("Return to Home");
 		setupButtonUI(btnBack, "Dialog", 14, 150, Pos.CENTER, 20, 540);

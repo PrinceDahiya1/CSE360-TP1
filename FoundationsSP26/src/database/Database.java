@@ -1756,4 +1756,49 @@ public class Database {
         }
         return list;
     }
+    
+    /*******
+     * <p> Method: getPeakActivityTime() </p>
+     * <p> Description: Scans all post timestamps to determine the most frequent 
+     * hour of activity for the Discussion Dashboard (Epic 4). </p>
+     */
+    public String getPeakActivityTime() {
+        java.util.HashMap<Integer, Integer> hourCounts = new java.util.HashMap<>();
+        String query = "SELECT timestamp FROM postDB WHERE isDeleted = FALSE";
+        try (java.sql.PreparedStatement pstmt = connection.prepareStatement(query)) {
+            java.sql.ResultSet rs = pstmt.executeQuery();
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            
+            while (rs.next()) {
+                String ts = rs.getString("timestamp");
+                if (ts != null && !ts.trim().isEmpty()) {
+                    try {
+                        java.time.LocalDateTime dateTime = java.time.LocalDateTime.parse(ts, formatter);
+                        int hour = dateTime.getHour();
+                        hourCounts.put(hour, hourCounts.getOrDefault(hour, 0) + 1);
+                    } catch (java.time.format.DateTimeParseException e) {
+                        // Safely ignore any malformed legacy timestamps
+                    }
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (hourCounts.isEmpty()) return "N/A";
+
+        int peakHour = 0;
+        int maxCount = 0;
+        for (java.util.Map.Entry<Integer, Integer> entry : hourCounts.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                maxCount = entry.getValue();
+                peakHour = entry.getKey();
+            }
+        }
+
+        // Format to readable 12-hour AM/PM string
+        String amPm = (peakHour >= 12) ? "PM" : "AM";
+        int displayHour = (peakHour % 12 == 0) ? 12 : (peakHour % 12);
+        return displayHour + ":00 " + amPm;
+    }
 }
