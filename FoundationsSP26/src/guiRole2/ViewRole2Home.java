@@ -14,7 +14,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ListView;
 import javafx.scene.control.CheckBox;
 
-
 /*******
  * <p> Title: ViewRole2Home Class. </p>
  * 
@@ -22,12 +21,22 @@ import javafx.scene.control.CheckBox;
  * the application.  The widgets on this page are likely the minimum number and kind for other role
  * pages that may be needed.</p>
  * 
+ * <p> TP3 Architecture & Design: Serves as the Presentation Layer (View) in the MVC architecture. 
+ * It provides the UI interfaces necessary to enable Staff User Stories 1.1 through 8.1, routing 
+ * all user interactions directly to {@code ControllerRole2Home} to maintain separation of concerns. </p>
+ * 
+ * <p> Tested by: Documented UI test procedures in {@code Manual Tests.pdf}. </p>
+ * 
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
+ * @author Micah Branton
+ * @author Sumukh Gowda
+ * @author Klim Savalia
  * 
- * @version 1.00		2025-04-20 Initial version
- *  
+ * @version 1.00    2025-04-20    Initial version
+ * @version 2.00    2026-04-22    Integrated TP3 Staff Grading Dashboard GUI components.
  */
 
 public class ViewRole2Home {

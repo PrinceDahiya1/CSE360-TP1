@@ -20,19 +20,27 @@ import entityClasses.Post;
  * on the H2 main page.)  This class leverages H2 and provides numerous special supporting methods.
  * </p>
  * 
+ * <p> Tested by: JUnit tests in {@code testing.TestTP3Features} and {@code testing.TestSecurityDB}. </p>
+ * 
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Lynn Robert Carter
  * @author Prince Dahiya
+ * @author Micah Branton
+ * @author Sumukh Gowda
+ * @author Klim Savalia
  * 
- * @version 2.00		2025-04-29 Updated and expanded from the version produce by on a previous
- * 							version by Pravalika Mukkiri and Ishwarya Hidkimath Basavaraj
- * @version 2.01		2025-12-17 Minor updates for Spring 2026
- * @version 2.02		2026-02-04 Added a function to return All users in the Database
- * @version 2.03		2026-02-03 Added a function to delete a user in the Database
- * @version 2.04		2026-02-08 Added and fixed logic for OTP feature
- * @version 2.05		2026-03-23 Fixed an issue in getAllPosts() and getPostsByAuthor() which would
- * 							make replies of soft deleted posts inaccessible 
+ * @version 2.00    2025-04-29    Updated and expanded from the version produce by on a previous
+ * 						version by Pravalika Mukkiri and Ishwarya Hidkimath Basavaraj
+ * @version 2.01    2025-12-17    Minor updates for Spring 2026
+ * @version 2.02    2026-02-04    Added a function to return All users in the Database
+ * @version 2.03    2026-02-03    Added a function to delete a user in the Database
+ * @version 2.04    2026-02-08    Added and fixed logic for OTP feature
+ * @version 2.05    2026-03-23    Fixed an issue in getAllPosts() and getPostsByAuthor() which would
+ * 						make replies of soft deleted posts inaccessible 
+ * @version 3.00    2026-04-22    Added TP3 functionality for Staff Epics (Rule of 3 verification, 
+ * 						Peak Activity parsing, Discussion stats, Instructor endorsements, 
+ * 						and Unresolved questions).
  */
 
 /*

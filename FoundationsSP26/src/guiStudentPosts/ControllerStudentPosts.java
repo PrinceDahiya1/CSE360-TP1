@@ -28,6 +28,7 @@ import java.util.Optional;
  *
  * @version 1.00    2026-03-21    Initial TP2 implementation
  * @version 1.01    2026-03-21    Added "Are you sure?" dialog, read tracking, My Posts
+ * @version 2.00	2026-04-22 	  Added TP3 integration (Perform Home action routing).
  */
 public class ControllerStudentPosts {
 

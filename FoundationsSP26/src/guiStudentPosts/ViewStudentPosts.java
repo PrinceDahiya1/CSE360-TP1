@@ -41,6 +41,7 @@ import java.util.ArrayList;
  * @version 1.00    2026-03-21    Initial TP2 implementation
  * @version 1.01    2026-03-21    Added My Posts, QUESTION/STATEMENT types, unread counts,
  *                               soft-delete display, "Are you sure?" confirmation
+ * @version 2.00	2026-04-22 	  Added TP3 integration (Home navigation, role-based delete actions, and Staff post types).
  */
 public class ViewStudentPosts {
 

@@ -45,9 +45,47 @@ import javafx.scene.control.CheckBox;
  * @author Lynn Robert Carter
  * @author Prince Dahiya
  * 
+ * @version 1.00    2025-08-17    Initial version
+ * @version 1.01    2026-02-08    Changed theUser var to public
+ *  
+ */
+
+/*******
+ * <p> Title: GUIAdminHomePage Class. </p>
+ * 
+ * <p> Description: The Java/FX-based Admin Home Page.  This class provides the JavaFX GUI widgets
+ * that enable an admin to perform admin functions.  This page contains a number of buttons that
+ * have not yet been implemented.  What has been implemented may not work the way the final product
+ * requires and there maybe defects in this code.
+ * 
+ * The class has been written using a singleton design pattern and is the View portion of the 
+ * Model, View, Controller pattern.  The pattern is designed that the all accesses to this page and
+ * its functions starts by invoking the static method displayAdminHome.  No other method should 
+ * attempt to instantiate this class as that is controlled by displayAdminHome.  It ensure that
+ * only one instance of class is instantiated and that one is properly configured for each use.  
+ * 
+ * Please note that this implementation is not appropriate for concurrent systems with multiple
+ * users. This Baeldung article provides insight into the issues: 
+ * https://www.baeldung.com/java-singleton</p>
+ * 
+ * <p> TP3 Architecture & Design: Serves as the Presentation Layer (View) in the MVC architecture. 
+ * To satisfy Staff Epic 6 (Moderation Override), the grading dashboard UI components have been 
+ * injected here, routing events to the shared {@code ControllerRole2Home}. This honors the reuse 
+ * goals defined in the Detailed Design document. </p>
+ * 
+ * <p> Tested by: Documented UI test procedures in {@code Manual Tests.pdf}. </p>
+ * 
+ * <p> Copyright: Lynn Robert Carter © 2025 </p>
+ * 
+ * @author Lynn Robert Carter
+ * @author Prince Dahiya
+ * @author Micah Branton
+ * @author Sumukh Gowda
+ * @author Klim Savalia
+ * 
  * @version 1.00		2025-08-17 Initial version
  * @version 1.01		2026-02-08 Changed theUser var to public
- *  
+ * @version 2.00		2026-04-22 Integrated Staff Grading Dashboard tools for Admin Override (Epic 6).
  */
 
 public class ViewAdminHome {
@@ -174,7 +212,7 @@ public class ViewAdminHome {
 		// Populate the dynamic aspects of the GUI with the data from the user and the current
 		// state of the system.
 		theDatabase.getUserAccountDetails(user.getUserName());		// Fetch this user's data
-		applicationMain.FoundationsMain.activeHomePage = theRole;	// Set this as the active Home																	// UserUpdate page
+		applicationMain.FoundationsMain.activeHomePage = theRole;	// Set this as the active Home
 
 		// Set the role for potential users to the default (No role selected)
 		combobox_SelectRole.getSelectionModel().select(0);

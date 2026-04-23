@@ -14,18 +14,29 @@ import java.util.ArrayList;
  * <p> Description: The Java/FX-based Role 2 Home Page.  This class provides the controller
  * actions basic on the user's use of the JavaFX GUI widgets defined by the View class.
  * 
- * This page is a stub for establish future roles for the application.
- * 
  * The class has been written assuming that the View or the Model are the only class methods that
  * can invoke these methods.  This is why each has been declared at "protected".  Do not change any
  * of these methods to public.</p>
  * 
+ * <p> TP3 Architecture & Design: Serves as the Controller Layer in the MVC architecture. It delegates 
+ * complex validation to {@code RuleOfThreeVerifier} and data retrieval to {@code Database}, fulfilling 
+ * Staff User Stories 1.1 through 8.1. By sharing this controller across both Staff and Admin views, 
+ * it honors the system's component reuse goals (Epic 6). </p>
+ * 
+ * <p> Tested by: JUnit tests in {@code testing.TestTP3Features} (for underlying data routing) 
+ * and manual tests outlined in {@code Manual Tests.pdf} (for UI integration and CSV export). </p>
+ * 
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
- * 
+ *
  * @author Lynn Robert Carter
+ * @author Prince Dahiya
+ * @author Micah Branton
+ * @author Sumukh Gowda
+ * @author Klim Savalia
  * 
- * @version 1.00		2025-08-17 Initial version
- * @version 1.01		2025-09-16 Update Javadoc documentation *  
+ * @version 1.00    2025-08-17    Initial version
+ * @version 1.01    2025-09-16    Update Javadoc documentation
+ * @version 2.00    2026-04-22    Transformed into the Grading Dashboard logic controller for TP3 Staff Epics.
  */
 
 public class ControllerRole2Home {
