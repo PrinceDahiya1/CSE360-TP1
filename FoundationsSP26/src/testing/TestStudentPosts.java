@@ -36,7 +36,6 @@ import entityClasses.Post;
  *   <li>REQ-11: My Posts filter returns only the logged-in user's posts</li>
  *   <li>REQ-12: Soft delete preserves replies</li>
  * </ul>
- * </p>
  *
  * @author Prince Dahiya
  * @author Sumukh Gowda
@@ -71,7 +70,7 @@ public class TestStudentPosts {
      *   <li>FAIL - something went wrong; the message explains what</li>
      * </ul>
      * A run with all PASSes means all TP2 student user story requirements are satisfied.
-     * </p>
+     * 
      *
      * @param args Command line args (not used)
      */

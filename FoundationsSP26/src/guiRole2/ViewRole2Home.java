@@ -21,7 +21,7 @@ import javafx.scene.control.CheckBox;
  * the application.  The widgets on this page are likely the minimum number and kind for other role
  * pages that may be needed.</p>
  * 
- * <p> TP3 Architecture & Design: Serves as the Presentation Layer (View) in the MVC architecture. 
+ * <p> TP3 Architecture and Design: Serves as the Presentation Layer (View) in the MVC architecture. 
  * It provides the UI interfaces necessary to enable Staff User Stories 1.1 through 8.1, routing 
  * all user interactions directly to {@code ControllerRole2Home} to maintain separation of concerns. </p>
  * 

@@ -11,6 +11,7 @@ import prototype.RuleOfThreeVerifier;
 
 /**
  * Title: TestTP3Features Class
+ * 
  * Description: A JUnit test suite designed to verify the new Staff Epic features 
  * introduced in TP3. It uses an isolated in-memory database to generate specific 
  * interaction scenarios to validate the Rule of 3, Discussion Statistics, 
@@ -85,7 +86,7 @@ public class TestTP3Features {
 
     /**
      * Method: testStaffMetadata
-     * Description: Epic 3 & 6. Verifies that Instructor Endorsements and Staff Comments 
+     * Description: Epic 3 and 6. Verifies that Instructor Endorsements and Staff Comments 
      * are correctly saved and retrieved from the database.
      */
     @Test

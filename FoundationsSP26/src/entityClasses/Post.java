@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter;
  *
  * @version 1.00    2026-03-21    Initial TP2 implementation
  * @version 1.01    2026-03-21    Added thread, isDeleted; fixed postType to QUESTION/STATEMENT
- * @version 2.00	2026-04-22	  Added TP3 instructor metadata fields (Endorsements & Staff Comments)
+ * @version 2.00	2026-04-22	  Added TP3 instructor metadata fields (Endorsements and Staff Comments)
  */
 public class Post {
 

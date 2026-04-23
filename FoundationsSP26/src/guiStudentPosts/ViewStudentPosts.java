@@ -43,6 +43,31 @@ import java.util.ArrayList;
  *                               soft-delete display, "Are you sure?" confirmation
  * @version 2.00	2026-04-22 	  Added TP3 integration (Home navigation, role-based delete actions, and Staff post types).
  */
+
+/*******
+ * <p> Title: ViewStudentPosts Class. </p>
+ * 
+ * <p> Description: The Java/FX-based Student Discussion Board. This class provides the UI
+ * for creating, viewing, and replying to posts. </p>
+ * 
+ * <p> TP3 Architecture and Design: Serves as the Presentation Layer (View). For TP3, this class 
+ * was modified to support cross-role integration by adding Home navigation, role-based visibility 
+ * for Delete actions, and exposing Announcement/Note post types specifically for Staff/Admin users. 
+ * This honors the system's access control requirements. </p>
+ * 
+ * <p> Tested by: Semi-automated tests in testing.TestStudentPosts and manual UI navigation tests documented in Manual Tests.pdf. </p>
+ * 
+ * <p> Copyright: Lynn Robert Carter © 2025 </p>
+ * 
+ * @author Lynn Robert Carter
+ * @author Prince Dahiya
+ * @author Micah Branton
+ * @author Sumukh Gowda
+ * @author Klim Savalia
+ * 
+ * @version 1.00    2025-03-01    Initial version for Phase 2
+ * @version 2.00	2026-04-22    Added TP3 integration (Home navigation, role-based delete actions, and Staff post types).
+ */
 public class ViewStudentPosts {
 
     private static double width  = applicationMain.FoundationsMain.WINDOW_WIDTH;

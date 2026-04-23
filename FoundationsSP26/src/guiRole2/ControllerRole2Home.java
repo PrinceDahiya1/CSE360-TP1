@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * can invoke these methods.  This is why each has been declared at "protected".  Do not change any
  * of these methods to public.</p>
  * 
- * <p> TP3 Architecture & Design: Serves as the Controller Layer in the MVC architecture. It delegates 
+ * <p> TP3 Architecture and Design: Serves as the Controller Layer in the MVC architecture. It delegates 
  * complex validation to {@code RuleOfThreeVerifier} and data retrieval to {@code Database}, fulfilling 
  * Staff User Stories 1.1 through 8.1. By sharing this controller across both Staff and Admin views, 
  * it honors the system's component reuse goals (Epic 6). </p>
