@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import java.sql.SQLException;
-
 import database.Database;
 import entityClasses.Post;
 import prototype.RuleOfThreeVerifier;
@@ -43,7 +42,8 @@ public class TestTP3Features {
 
     /**
      * Method: testRuleOfThreeVerifier
-     * Description: Epic 1. Tests that a student only passes if they reply to 3 DISTINCT peers.
+     * Description: Epic 1. Validates the {@code RuleOfThreeVerifier.verifyStudentInteraction()} method. 
+     * Tests that a student only passes if they reply to 3 DISTINCT peers.
      * Verifies that self-replies and multiple replies to the same peer do not inflate the score.
      */
     @Test
@@ -114,7 +114,8 @@ public class TestTP3Features {
 
     /**
      * Method: testDiscussionStatistics
-     * Description: Epic 4. Verifies the database accurately counts total Questions and Statements.
+     * Description: Epic 4. Validates the {@code Database.getDiscussionStatistics()} method. 
+     * Verifies the database accurately counts total Questions and Statements.
      */
     @Test
     public void testDiscussionStatistics() {

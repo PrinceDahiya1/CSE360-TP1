@@ -369,10 +369,19 @@ public class ViewStudentPosts {
         } else {
             label_DetailTitle.setText(post.getTitle());
             textArea_DetailBody.setText(post.getBody());
-            label_DetailMeta.setText("By: " + post.getAuthorUsername()
+            // 1. The base string that everyone is allowed to see
+            String metaText = "By: " + post.getAuthorUsername()
                     + "  |  " + post.getTimestamp() + "  |  " + post.getPostType()
-                    + "  |  Thread: " + post.getThread()
-                    + (post.getStaffComment().isEmpty() ? "" : "\nStaff: " + post.getStaffComment()));
+                    + "  |  Thread: " + post.getThread();
+            
+            // 2. Safely append the staff comment ONLY if they have the right role
+            // NOTE: Replace 'userHasStaffPrivileges()' with your actual role-check method!
+            if (!post.getStaffComment().isEmpty() && isStaffOrAdmin) {
+                metaText += "\nStaff: " + post.getStaffComment();
+            }
+            
+            // 3. Set the text
+            label_DetailMeta.setText(metaText);
             label_Resolved.setText(post.isResolved() ? "✓ Resolved" : "");
 
             // Only show resolve button for QUESTION posts
