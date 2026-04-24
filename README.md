@@ -2,39 +2,44 @@
 
 **An interactive, role-based educational discussion system (inspired by Ed Discussion).** Developed as part of the Computer Science Software Engineering coursework (CSE 360) at Arizona State University by Prince Dahiya and team. 
 
-This desktop application leverages **Java**, **JavaFX**, and an **H2 Relational Database** to provide a secure, multi-role platform for students and instructors to collaborate, ask questions, and manage coursework discussions. The codebase strictly adheres to the **Model-View-Controller (MVC)** architectural pattern and emphasizes Agile development practices, rigorous testing, and extensive Javadoc documentation.
+This desktop application leverages **Java**, **JavaFX**, and an embedded **H2 Relational Database** to provide a secure, multi-role platform for students and instructors to collaborate. The codebase strictly adheres to the **Model-View-Controller (MVC)** architectural pattern and emphasizes Agile development practices, performance-optimized database queries, and rigorous automated testing.
 
 ---
 
-## 🚀 Currently Developing (Phase 2)
-*The team is actively building the core discussion functionalities and expanding the application's interactive features.*
+## 🚀 Core Features
 
-* **Implementing** a robust Q&A discussion board frontend using the Model-View-Controller (MVC) architecture (`ModelStudentPosts`, `ViewStudentPosts`, `ControllerStudentPosts`).
-* **Building** backend entity classes (`Post.java`) to support full CRUD (Create, Read, Update, Delete) database operations for student discussion threads.
-* **Designing** a dynamic JavaFX user interface that allows students to seamlessly view, search, publish, edit, and delete their questions and replies.
-* **Engineering** a comprehensive automated testing suite to validate all database interactions, UI state changes, and system reliability.
-* **Writing** extensive Javadoc documentation mapped directly to Agile User Stories to maintain high code readability and maintainability standards.
-* **Managing** iterative Agile sprints using Jira, conducting regular standups, and utilizing feature-branch Git workflows with strict pull request reviews.
+### 👨‍🏫 Instructor Analytics & Automated Grading (Phase 3)
+* **Automated Participation Tracking ("Rule of 3"):** Engineered a high-performance SQL-driven verification engine (`RuleOfThreeVerifier`) that instantly calculates if a student has met participation thresholds by querying distinct peer interactions, filtering out self-replies.
+* **Discussion Analytics Dashboard:** Implemented a real-time analytics suite to track unresolved questions, question-to-statement ratios, and calculate Peak Activity Times using SQL aggregations.
+* **Student Performance Export:** Developed an OS-level file generation tool allowing instructors to instantly export aggregated grading metrics to CSV format for gradebook integration.
+* **Contextual Grading & Endorsements:** Built specialized UI views for graders to evaluate student replies alongside their parent threads, complete with a one-click "Instructor Endorsed" badge system to highlight accurate answers.
+
+### 💬 Interactive Q&A Discussion Board (Phase 2)
+* **Full CRUD Functionality:** Designed a robust frontend using the MVC architecture allowing students to seamlessly publish, edit, search, and delete their questions and statements.
+* **Targeted Search & Filtering:** Implemented method-overloading within the JavaFX Controllers to allow real-time string filtering and targeted post-history isolation without redundant database calls.
+* **Advanced Moderation Overrides:** Engineered a role-checking mechanism granting Instructors and Admins the ability to bypass standard ownership rules to forcefully hide/delete inappropriate content and append internal "Staff-Only" grading comments.
+
+### 🔐 Secure Authentication & RBAC (Phase 1)
+* **Multi-Role Access Control:** Established a strict Role-Based Access Control (RBAC) system that dynamically routes users to contextual Admin, Student, or Instructor interfaces.
+* **Invitation & Recovery System:** Developed an admin-controlled invitation system using secure, single-use generation codes and time-sensitive One-Time Passwords (OTPs) for account recovery.
+* **Security & Credential Management:** Built a robust password evaluation engine enforcing strict cryptographic constraints and patched critical bypass vulnerabilities to ensure forced credential updates.
 
 ---
 
-## ✅ Completed Features (Phase 1 & Foundation)
-*The foundational architecture, security, and administrative tools have been successfully deployed and tested.*
+## 🧠 Technical Highlights & Architecture
 
-* **Engineered** a secure user authentication system that supported initial account creation exclusively via admin-generated, single-use invitation codes.
-* **Established** a multi-role access control (RBAC) system that allowed seamless routing and contextual switching between Admin, Student, and Instructor interfaces.
-* **Developed** a comprehensive Admin Dashboard enabling authorized users to invite new members, list active accounts, delete users, and trigger secure One-Time Passwords (OTPs) for account recovery.
-* **Integrated** a local H2 relational database to securely persist user credentials, role assignments, and profile metadata.
-* **Built** a robust password evaluation engine that enforced strict security criteria (minimum length, casing, numeric, and special character requirements).
-* **Created** a user profile management module allowing members to update their credentials, email addresses, and preferred names securely.
-* **Patched** critical security vulnerabilities, including an OTP bypass exploit, ensuring users were forced to update temporary passwords before accessing platform features.
+* **Performance Optimization:** Deliberately offloaded heavy data computations (such as peak activity calculations and interaction verification) to the H2 database layer using optimized SQL queries (`COUNT DISTINCT`, `GROUP BY`), preventing JVM memory bottlenecks and ensuring scalable UI performance.
+* **Component Reuse & Low Technical Debt:** Strategically expanded existing entity classes (`Post.java`) via `ALTER TABLE` operations to support new grading metadata, rather than building redundant tables, maintaining a lightweight memory footprint.
+* **Rigorous Automated Testing:** Engineered a comprehensive JUnit test suite utilizing isolated, in-memory H2 databases. This allowed the team to inject extreme, edge-case test data to validate automated grading logic without corrupting the live production database.
+* **Security-First Database Operations:** Prevented SQL Injection (CWE-89) and Broken Access Control (CWE-862) vulnerabilities by exclusively utilizing parameterized JDBC `PreparedStatement` objects across all CRUD operations.
 
 ---
 
 ## 🛠️ Tech Stack & Tools
 * **Language:** Java (JDK 25)
 * **GUI Framework:** JavaFX
-* **Database:** H2 Database Engine (SQL)
-* **Architecture:** Model-View-Controller (MVC), Singleton Pattern
-* **Version Control:** Git & GitHub (Branch Protection, Code Reviews)
-* **Project Management:** Jira (Agile/Scrum methodologies)
+* **Database:** H2 Database Engine (Embedded SQL)
+* **Architecture:** Model-View-Controller (MVC), Client-Server Model
+* **Testing:** JUnit 5 (with in-memory database isolation)
+* **Version Control:** Git & GitHub (Feature-branch workflows, PR Code Reviews)
+* **Project Management:** Jira (Agile/Scrum methodologies, 2-week sprints)
